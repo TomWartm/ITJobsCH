@@ -2,110 +2,87 @@ import os
 import json
 import re
 # Define CS-related job keywords
-cs_jobs = {
-    # General Software & Web Development
-    "Software Engineer", "Software Developer", "Fullstack Developer", "Full-Stack Developer", "Fullstack Entwickler",
-    "Backend Engineer", "Frontend Engineer", "Web Developer", "Mobile Developer",
-    "Game Developer", "Embedded Systems Engineer", "Software Architect",
-    "Fullstack Engineer", "Full Stack Engineer", "Software Entwickler", "Software-Entwickler", "Softwarentwickler",
-    "Software Entwickler/in", "Applikationsentwickler", "Applikationsentwickler/in",
-    "Softwarearchitekt", "Softwarearchitekt/in", "Anwendungsentwickler",
-    "Anwendungsentwickler/in", "IT-Entwickler", "IT-Entwickler/in", "Software-Engineer", "Softwareengineer",
-    "Application Developer", "Automation Engineer", "Frontend Developer", "Backend Developer",
-    "Application Engineer", "Software-Entwicklungsingenieur", "Front-End Engineer", "Research Engineer", 
-    "Softwareentwickler", "Software Ingenieur", "Full Stack Developer", "Mobile App Ingenieur", "Mobile App Entwickler", "Java Entwickler",
-    "Java Fullstack",
+cs_job_categories = {
+    "Software Engineer": {
+        "Software Engineer", "Software Developer", "Fullstack Developer", "Full-Stack Developer", "Fullstack Entwickler",
+        "Backend Engineer", "Frontend Engineer", "Web Developer", "Mobile Developer",
+        "Game Developer", "Embedded Systems Engineer", "Software Architect",
+        "Fullstack Engineer", "Full Stack Engineer", "Software Entwickler", "Software-Entwickler", "Softwarentwickler",
+        "Software Entwickler/in", "Applikationsentwickler", "Applikationsentwickler/in",
+        "Softwarearchitekt", "Softwarearchitekt/in", "Anwendungsentwickler",
+        "Anwendungsentwickler/in", "IT-Entwickler", "IT-Entwickler/in", "Software-Engineer", "Softwareengineer",
+        "Application Developer", "Automation Engineer", "Frontend Developer", "Backend Developer",
+        "Application Engineer", "Software-Entwicklungsingenieur", "Front-End Engineer", "Research Engineer", 
+        "Softwareentwickler", "Software Ingenieur", "Full Stack Developer", "Mobile App Ingenieur", "Mobile App Entwickler", "Java Entwickler",
+        "Java Fullstack","Entwickler:in", "Senior Developer", "Python Developer", "Applikations-Entwickler", "Software Development", "Full Stack Entwickler",
+    },
     
-    # Data Science & AI
-    "Data Scientist", "Machine Learning Engineer", "AI Engineer",
-    "Big Data Engineer", "Data Engineer", "Data Analyst",
-    "Künstliche Intelligenz Ingenieur", "KI-Ingenieur", "Datenwissenschaftler", "Computer Vision",
-    "Datenanalyst", "Dateningenieur", "Maschinelles Lernen Ingenieur", "Database Engineer", "Teamlead Data", "Data Architect",
+    "Data Engineer": {
+        "Data Scientist", "Machine Learning Engineer", "AI Engineer",
+        "Big Data Engineer", "Data Engineer", "Data Analyst",
+        "Künstliche Intelligenz Ingenieur", "KI-Ingenieur", "Datenwissenschaftler", "Computer Vision",
+        "Datenanalyst", "Dateningenieur", "Maschinelles Lernen Ingenieur", "Database Engineer", "Teamlead Data", "Data Architect", 
+        "Data Warehouse Architect", "Data Warehouse Engineer","Data Integration Engineer","Datenbankarchitekt", "SQL-Entwickler", 
+        "Datenbank Engineer", "Datenbank Spezialist", "Generative AI", "Computer Vision Engineer", "NLP Engineer", "Computer Vision Spezialist",
+        "Natural Language Processing Engineer", "Robotik Ingenieur", "Data Science", "Data & AI"
+    },
     
-    # Cloud & DevOps
-    "Cloud Engineer", "DevOps Engineer", "Cloud Architect", "Site Reliability Engineer",
-    "System Engineer", "Systemadministrator", "Cloud-Architekt", "SRE",
-    "Systemingenieur", "Netzwerkadministrator", "IT-Administrator", "ICT Architekt", "ICT-Architekt", "Network Engineer", 
-    "Test Engineer", "Cloud Systems Engineer",
+    "Cloud Engineer": {
+        "Cloud Engineer", "Cloud Architect", "Site Reliability Engineer",
+        "System Engineer", "Systemadministrator", "Cloud-Architekt", "SRE",
+        "Systemingenieur", "Netzwerkadministrator", "Network Engineer", 
+         "Cloud Systems Engineer"
+    },
     
-    # Security & Networking
-    "Cybersecurity Engineer", "Security Engineer", "IT-Security Engineer",
-    "Netzwerksicherheit Ingenieur", "IT-Sicherheitsspezialist",
-    "Penetration Tester", "Ethical Hacker", "Netzwerktechniker", "Network Engineer",
+    "Security Engineer": {
+        "Cybersecurity Engineer", "Security Engineer", "IT-Security Engineer",
+        "Netzwerksicherheit Ingenieur", "IT-Sicherheitsspezialist",
+        "Penetration Tester", "Ethical Hacker", "Netzwerktechniker", "Network Engineer", "Security Researcher"
+    },
     
-    # Specialized Fields
-    "Computer Vision Engineer", "NLP Engineer", "Computer Vision Spezialist",
-    "Natural Language Processing Engineer", "Robotik Ingenieur", "Automatisierungsingenieur",
+    "Infrastructure": {
+        "Database Administrator", "Datenbankadministrator", "Datenbankentwickler",
+         "IT-Architekt", "Plattformingenieur",
+        "Platform Engineer", "Storage Engineer", "Systems Engineer", "Test Engineer",
+        "System-Engineer",
+        "Datenbank-Entwickler", "Datenbank-Administrator",
+        "DevOps Engineer", "Test Engineer", "IT-Administrator", "ICT Architekt", "ICT-Architekt",
+        "IT-Supporter", "Verification Engineer", "Automatisierungsingenieur"
+    },
     
-    # Database & Infrastructure
-    "Database Administrator", "Datenbankadministrator", "Datenbankentwickler",
-    "Datenbankarchitekt", "SQL-Entwickler", "IT-Architekt", "Plattformingenieur",
-    "Platform Engineer", "Storage Engineer", "Systems Engineer", "Test Engineer",
-    "Data Integration Engineer", "Data Warehouse Engineer", "Data Warehouse Architect","System-Engineer",
-    "Datenbank Engineer", "Datenbank Spezialist", "Datenbank-Entwickler", "Datenbank-Administrator", 
     
-    # Design
-    "Design Engineer", "UX Designer", "UI Designer", "Product Designer",
+    "Design": {
+        "Design Engineer", "UX Designer", "UI Designer", "Product Designer"
+    },
     
-    # Consulting & Management
-    "IT-Consultant", "IT-Berater", "Technischer Berater", "Projektmanager IT",
-    "IT-Projektleiter", "Technischer Produktmanager", "Technical Lead", "Senior Developer", "Entwickler:in", 
-    "Requirements Engineer", "Middleware Engineer", "Application-Manager", "IT-Security Manager", "Lead Architect", 
-    "Solution Engineer", "Requirement Engineer"
+    "Consulting & Management": {
+        "IT-Consultant", "IT-Berater", "Technischer Berater", "Projektmanager IT",
+        "IT-Projektleiter", "Technischer Produktmanager", "Technical Lead", 
+        "Requirements Engineer", "Middleware Engineer", "Application-Manager", "IT-Security Manager", "Lead Architect", 
+        "Solution Engineer", "Requirement Engineer", "Projektleiter:in", "IT Management", "Salesforce Engineer", "Cyber Security Consultant", "Cloud Consultant"
+    }
 }
 
 # Define a set of CS-related keywords (can be extended)
-cs_keywords = {
-    
-    # Programming Languages
+programming_languages = {
     "Python", "Java", "C", "C#", "C++", "JavaScript", "TypeScript", "HTML", "CSS",
     "Go", "Rust", "Swift", "Kotlin", "Ruby", "PHP", "Scala", "Perl", "Lua", "Dart",
-    "R", "MATLAB", "Shell", "Bash", "PowerShell", "Objective-C",
-
-    # Web & Frontend Frameworks
-    "React", "Angular", "Vue", "Svelte", "Next.js", "Nuxt.js", "SolidJS",
-    
-    # Backend Frameworks
-    "Node.js", "Django", "Flask", "Spring", "FastAPI", "Express.js", "NestJS",
-    "ASP.NET", "Ruby on Rails", "Laravel", "Symfony", "Ktor",
-
-    # Databases & Query Languages
-    "SQL", "NoSQL", "PostgreSQL", "MongoDB", "MySQL", "SQLite", "Cassandra",
-    "MariaDB", "CockroachDB", "DynamoDB", "OracleDB", "Redis", "Elasticsearch",
-    "GraphQL", "CouchDB", "InfluxDB", "Neo4j", "Firebase", "Snowflake",
-
-    # DevOps, Cloud & CI/CD
-    "Docker", "Kubernetes", "Terraform", "Ansible", "Jenkins", "GitLab", "CI/CD",
-    "CircleCI", "TravisCI", "AWS", "Azure", "GCP", "IBM Cloud", "DigitalOcean",
-    "OpenShift", "CloudFormation", "Pulumi", "Helm", "ArgoCD",
-
-    # Messaging & Streaming
-    "Kafka", "RabbitMQ", "MQTT", "ActiveMQ", "ZeroMQ", "NATS", "Pulsar",
-
-    # AI/ML & Data Science
-    "TensorFlow", "PyTorch", "Scikit-Learn", "Keras", "XGBoost", "LightGBM",
-    "OpenCV", "NLTK", "spaCy", "Pandas", "NumPy", "Matplotlib", "Seaborn",
-    "Dask", "Hugging Face", "LangChain", "Ray", "MLflow", "Kubeflow",
-
-    # Big Data & Distributed Computing
-    "Apache Spark", "Apache Flink", "Hadoop", "Apache Beam", "Presto", "Dremio",
-
-    # API & Microservices
-    "REST", "GraphQL", "gRPC", "OpenAPI", "Swagger", "Postman", "OAuth", "JWT",
-
-    # Security
-    "OAuth", "OIDC", "JWT", "SSL/TLS", "OWASP", "SAST", "DAST", "SIEM", "SOC",
-    "IAM", "PKI", "Zero Trust", "Cybersecurity", "Penetration Testing",
-
-    # Blockchain & Web3
-    "Ethereum", "Solidity", "Web3.js", "Hardhat", "Truffle", "IPFS", "Polygon",
-    "Binance Smart Chain", "Rust (Solana)", "Smart Contracts",
-
-    # Other
-    "GraphQL", "WebSockets", "Reverse Proxy", "Nginx", "Apache", "Varnish",
-    "Load Balancing", "CDN", "Edge Computing", "Linux", "Windows", "macOS", "Office 365",
-    "Grafana"
+    "R", "MATLAB", "Shell", "Bash", "PowerShell", "Objective-C", "SQL"
 }
+
+frameworks = {
+    "React", "Angular", "Vue", "Svelte", "Next.js", "Nuxt.js", "SolidJS",  # Web & Frontend Frameworks
+    "Node.js", "Django", "Flask", "Spring", "FastAPI", "Express.js", "NestJS",  # Backend Frameworks
+    "ASP.NET", "Ruby on Rails", "Laravel", "Symfony", "Ktor",  # Backend Frameworks
+}
+
+tools = {
+    "Docker", "Kubernetes", "Git", "Terraform", "Ansible", "Jenkins", "GitLab", "CI/CD", "Grafana"
+}
+operating_systems = {
+    "Linux", "Windows", "macOS"
+}
+
 # Education levels and their corresponding groups
 education_levels = {
     "Bachelor": [r"\bBachelor\b", r"\bB\.Sc\.\b", r"\bBSc\b", r"\bB\.A\.\b", r"\bBA\b", r"\bB\.Eng\.\b", r"\bBEng\b", r"\bB\.Ed\.\b", r"\bBBA\b", r"\bBachelor of Science\b", r"\bBachelor of Arts\b", r"\bBachelor of Engineering\b", r"\bBachelor of Education\b", r"\bBachelor of Business Administration\b", r"\bBachelordiplom\b", r"\bFH-Diplom\b", r"\bDiplom \(FH\)\b", r"\bDipl\.-Ing\.\(FH\)\b", r"Hochschulstudium", r"Hochschulabschluss"],
@@ -117,51 +94,65 @@ education_levels = {
     "Vocational": [r"\bAusbildung\b", r"\bBerufsausbildung\b", r"\bTechniker\b", r"\bMeister\b", r"\bAssociate Degree\b", r"\bAdvanced Diploma\b", r"\bInformatikausbildung\b", r"Höhere Berufsbildung"  ]
 }
 
+number_map = {
+    "zero": 0, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, 
+    "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10,
+    "null": 0, "eins": 1, "zwei": 2, "drei": 3, "vier": 4, "fünf": 5, 
+    "sechs": 6, "sieben": 7, "acht": 8, "neun": 9, "zehn": 10
+}
+
 def extract_keywords(job, description_text):
     
     # Find all matching keywords
-    found_keywords = sorted({kw for kw in cs_keywords if re.search(rf"\b{kw}\b", description_text, re.IGNORECASE)})
-
-
-    job["cs_keywords"] = found_keywords
+    job["programming_languages"] = sorted({kw for kw in programming_languages if re.search(rf"\b{kw}\b", description_text, re.IGNORECASE)})
+    job["frameworks"] = sorted({fw for fw in frameworks if re.search(rf"\b{fw}\b", description_text, re.IGNORECASE)})
+    job["tools"] = sorted({tool for tool in tools if re.search(rf"\b{tool}\b", description_text, re.IGNORECASE)})
+    job["operating_systems"] = sorted({os for os in operating_systems if re.search(rf"\b{os}\b", description_text, re.IGNORECASE)})
+    
     
 def extract_experience(job, description_text):
-    years = set()  # Use set to store unique years
+    years = set()  
 
     experience_patterns = [
-        r"(\d+)\+?\s*(?:years?|Jahre)",          # "5+ years", "3 Jahre"
-        r"at least (\d+)\s*years?",              # "at least 3 years"
-        r"mindestens (\d+)\s*Jahre?",            # "mindestens 3 Jahre"
-        r"mehr als (\d+)\s*Jahre?",              # "mehr als 2 Jahre"
-        r"more than (\d+)\s*years?",             # "more than 5 years"
-        r"(\d+)-(\d+)\s*(?:years?|Jahre)"        # "3-5 years", "3-5 Jahre"
+        r"(\d+)\+?\s*(?:years?|Jahre)",          
+        r"at least (\d+)\s*years?",              
+        r"mindestens (\d+)\s*Jahre?",            
+        r"mehr als (\d+)\s*Jahre?",              
+        r"more than (\d+)\s*years?",             
+        r"(\d+)-(\d+)\s*(?:years?|Jahre)",       
+        r"(zero|one|two|three|four|five|six|seven|eight|nine|ten)\s*(?:years?|Jahre)",  # English words
+        r"(null|eins|zwei|drei|vier|fünf|sechs|sieben|acht|neun|zehn)\s*(?:years?|Jahre)"  # German words
     ]
-    
 
-    if any(synonym in description_text.lower() for synonym in ["mehrjährig", "langjährig", "viele jahre", "mehr als", "many years"]):
+    # Handle general terms meaning "several years"
+    if any(term in description_text.lower() for term in ["mehrjährig", "langjährig", "viele jahre", "many years", "mehrere Jahre"]):
         years.add(2)  
 
     for pattern in experience_patterns:
-        matches = re.findall(pattern, description_text)
+        matches = re.findall(pattern, description_text, re.IGNORECASE)
         for match in matches:
             if isinstance(match, tuple):  
                 for num in match:
                     if num.isdigit():
                         years.add(int(num))
+                    elif num.lower() in number_map:  
+                        years.add(number_map[num.lower()])
             elif match.isdigit():  
                 years.add(int(match))
+            elif match.lower() in number_map:  
+                years.add(number_map[match.lower()])
     
-    job["years"] = sorted(years)  
+    job["years"] = sorted(years)
 
 def extract_job_name(job):
-    job_title = job["job_title"].lower()
 
-    job_title_cleaned = None
-    for cs_job in cs_jobs:
-        if cs_job.lower() in job_title:
-            job_title_cleaned = cs_job
+    for job_category, job_titles in cs_job_categories.items():
+        for job_title in job_titles:
+            if job_title.lower() in job["job_title"].lower():
+                job["job_title_cleaned"] = job_title
+                job["job_category"] = job_category
             
-    job["job_title_cleaned"] = job_title_cleaned
+    
     
 
 def extract_career_stage(job):
@@ -198,10 +189,15 @@ parent_dir = os.path.dirname(os.path.dirname(__file__))
 
 with open(parent_dir+'/data/jobs.json', 'r') as file:
     jobs = json.load(file)
+with open(parent_dir+'/data/jobs2.json', 'r') as file:
+    jobs2 = json.load(file)
+
+# Total number of jobs to process
+total_jobs = len(jobs) + len(jobs2)
 
 jobs_processed = []
-for i, job in enumerate(jobs):
-    print(f"Preprocessing {i}/{len(jobs)}\n")
+for i, job in enumerate(jobs+jobs2):
+    print(f"Preprocessing {i}/{total_jobs}\n")
     descriptions_text = " ".join(
         " ".join(desc_list)
         for desc_dict in job["descriptions"]

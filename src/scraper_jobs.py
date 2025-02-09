@@ -35,7 +35,6 @@ def get_job_urls(search_term, driver):
             
         for job_preview in searched_jobs:
             job_website_link = job_preview.find_element(By.TAG_NAME, 'article').find_element(By.CSS_SELECTOR, 'a[data-cy="job-link"]').get_attribute("href")
-            job_website_link
             job_urls.append(job_website_link)
         
         
@@ -128,7 +127,7 @@ if __name__ == "__main__":
     
     existing_urls = [item['url'] for item in jobs if "url" in item]
     if download_again:
-        search_queries = ["software engineer", "data engineer"]
+        search_queries = ["software engineer", "data engineer", "data scientist"]
         for search_query in search_queries:
             new_job_urls = get_job_urls(search_query, driver)
             
