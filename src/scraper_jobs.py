@@ -134,7 +134,7 @@ if __name__ == "__main__":
             with open(jobs_cache_path, 'w') as file:
                 for new_url in new_job_urls:
                     if new_url not in existing_urls:
-                        jobs.append({"url": new_url, "downloaded": False, "search_query": search_query})
+                        jobs.append({"url": new_url, "downloaded": False, "search_query": search_query, "website": "Jobs"})
                 json.dump(jobs, file, indent=4)
         
     # download data

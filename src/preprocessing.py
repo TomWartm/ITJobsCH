@@ -203,12 +203,13 @@ for i, job in enumerate(jobs+jobs2):
         for desc_dict in job["descriptions"]
         for desc_list in desc_dict.values()
     )
-    if len(descriptions_text) > 0:
-        
-        extract_keywords(job, descriptions_text)
-        extract_experience(job, descriptions_text)
+    if "job_title" in job:
         extract_job_name(job)
         extract_career_stage(job)
+        
+            
+        extract_keywords(job, descriptions_text)
+        extract_experience(job, descriptions_text)
         extract_education_stage(job, descriptions_text)
         
         jobs_processed.append(job)

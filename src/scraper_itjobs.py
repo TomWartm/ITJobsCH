@@ -10,6 +10,9 @@ import json
 
 import os
 import sys
+import pandas as pd
+
+
 sys.path.append("..") # Adds higher directory to python modules path.
 
 
@@ -69,8 +72,11 @@ def scrape_website(job, driver):
         
     
     try:
-        job['publication_date'] = driver.find_element(By.XPATH, "/html/body/div[5]/div/div[2]/div/div/div[2]/div[2]/section[1]/div[1]/p/span[2]").text
-
+        
+        raw_str = driver.find_element(By.XPATH, "/html/body/div[5]/div/div[2]/div/div/div[2]/div[2]/section[1]/div[1]/p/span[2]").text
+        date_obj = pd.to_datetime(raw_str, format="%d.%m.%Y")
+        job['publication_date'] = date_obj.strftime("%d %B %Y")
+        
     except NoSuchElementException:
         print("Publication Date not found, continuing...")
         
@@ -96,7 +102,7 @@ def scrape_website(job, driver):
         li_elements = driver.find_elements(By.TAG_NAME, 'li')
 
         # Get the text from each <li> element
-        li_texts = [li.text for li in li_elements]
+        li_texts = [li.text for li in li_elements if len(li.text) > 0]
         job['descriptions'].append({1:li_texts})
         
         
