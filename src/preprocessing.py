@@ -73,7 +73,7 @@ programming_languages = {
 frameworks = {
     "React", "Angular", "Vue", "Svelte", "Next.js", "Nuxt.js", "SolidJS",  # Web & Frontend Frameworks
     "Node.js", "Django", "Flask", "Spring", "FastAPI", "Express.js", "NestJS",  # Backend Frameworks
-    "ASP.NET", "Ruby on Rails", "Laravel", "Symfony", "Ktor",  # Backend Frameworks
+    "ASP.NET", "Ruby on Rails", "Laravel", "Symfony", "Ktor",".NET"  # Backend Frameworks
 }
 
 tools = {
@@ -104,7 +104,23 @@ number_map = {
 def extract_keywords(job, description_text):
     
     # Find all matching keywords
-    job["programming_languages"] = sorted({kw for kw in programming_languages if re.search(rf"\b{kw}\b", description_text, re.IGNORECASE)})
+    extracted_languages = set()
+    
+    for kw in programming_languages:
+        if kw == "C":
+            # Ensure "C" is not part of "C++" or "C#"
+            if re.search(r"\bC\b(?![#\+])", description_text):
+                extracted_languages.add("C")
+        elif kw in {"C#", "C++"}:
+            # Directly match "C#" and "C++" since \b doesn't work well
+            if re.search(rf"(?<!\w){re.escape(kw)}(?!\w)", description_text):
+                extracted_languages.add(kw)
+        else:
+            # General case for other languages
+            if re.search(rf"\b{re.escape(kw)}\b", description_text, re.IGNORECASE):
+                extracted_languages.add(kw)
+    
+    job["programming_languages"] = sorted(extracted_languages)
     job["frameworks"] = sorted({fw for fw in frameworks if re.search(rf"\b{fw}\b", description_text, re.IGNORECASE)})
     job["tools"] = sorted({tool for tool in tools if re.search(rf"\b{tool}\b", description_text, re.IGNORECASE)})
     job["operating_systems"] = sorted({os for os in operating_systems if re.search(rf"\b{os}\b", description_text, re.IGNORECASE)})
