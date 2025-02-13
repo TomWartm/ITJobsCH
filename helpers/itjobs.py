@@ -34,7 +34,7 @@ def get_job_urls(driver: webdriver) -> List[str]:
             print("Clicked 'Mehr laden' button")
 
         except NoSuchElementException as e:
-            print("No more 'Mehr laden' button found or it's not clickable.", e)
+            print("No more 'Mehr laden' button found or it's not clickable.")
             break  # Exit loop if button is no longer found
 
 

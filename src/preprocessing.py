@@ -101,6 +101,27 @@ number_map = {
     "null": 0, "eins": 1, "zwei": 2, "drei": 3, "vier": 4, "fünf": 5, 
     "sechs": 6, "sieben": 7, "acht": 8, "neun": 9, "zehn": 10
 }
+# List of canton names and abbreviations
+cantons = [
+    "Aargau", "AG", "Appenzell Ausserrhoden", "AI", "Appenzell Innerrhoden", 
+    "AR", "Basel-Landschaft", "BL", "Basel-Stadt", "BS", "Bern", "BE", "Fribourg", 
+    "FR", "Geneva", "GE", "Glarus", "GL", "Graubünden", "GR", "Jura", "JU", "Luzern", 
+    "LU", "Neuchatel", "NE", "Nidwalden", "NW", "Obwalden", "OW", "Schaffhausen", 
+    "SH", "Schwyz", "SZ", "Solothurn", "SO", "St. Gallen", "SG", "Ticino", "TI", 
+    "Thurgau", "TG", "Uri", "UR", "Valais", "VS", "Vaud", "VD", "Zug", "ZG", 
+    "Zürich", "ZH"
+]
+
+# Create a dictionary of abbreviations mapping to full canton names
+canton_dict = {
+    "AG": "Aargau", "AI": "Appenzell Ausserrhoden", "AR": "Appenzell Innerrhoden", 
+    "BL": "Basel-Landschaft", "BS": "Basel-Stadt", "BE": "Bern", "FR": "Fribourg", 
+    "GE": "Geneva", "GL": "Glarus", "GR": "Graubünden", "JU": "Jura", "LU": "Luzern", 
+    "NE": "Neuchatel", "NW": "Nidwalden", "OW": "Obwalden", "SH": "Schaffhausen", 
+    "SZ": "Schwyz", "SO": "Solothurn", "SG": "St. Gallen", "TI": "Ticino", 
+    "TG": "Thurgau", "UR": "Uri", "VS": "Valais", "VD": "Vaud", "ZG": "Zug", 
+    "ZH": "Zürich"
+}
 
 def extract_keywords(job, description_text):
     
@@ -195,7 +216,19 @@ def extract_education_stage(job, description_text):
     
 
     job["education"] = education
-    
+
+
+def extract_canton(job):
+    approx_canton = None
+    if 'place_of_work' in job.keys() and isinstance(job['place_of_work'], str):
+        address_lower = job['place_of_work'].lower()  # Make address lowercase for easier matching
+        for canton in cantons:
+            # Match canton names or abbreviations (case-insensitive)
+            if re.search(r"\b" + re.escape(canton.lower()) + r"\b", address_lower):
+                approx_canton = canton_dict.get(canton.upper(), canton)  # Ensure abbreviation maps to full name
+
+
+    job["canton"] = approx_canton
     
     
 if __name__ == "__main__":
@@ -229,10 +262,11 @@ if __name__ == "__main__":
         if "job_title" in job:
             extract_job_name(job)
             extract_career_stage(job)
+            extract_canton(job)
             extract_keywords(job, descriptions_text)
             extract_experience(job, descriptions_text)
             extract_education_stage(job, descriptions_text)
-            
+
             jobs_processed.append(job)
 
 
