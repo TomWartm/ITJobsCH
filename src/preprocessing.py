@@ -204,6 +204,17 @@ if __name__ == "__main__":
 
     with open(parent_dir+'/data/jobs.json', 'r') as file:
         jobs = json.load(file)
+        
+    # Remove duplicates by converting dicts to sorted tuples of items
+    unique_data = list({json.dumps(item, sort_keys=True) for item in jobs})
+
+    unique_data = [json.loads(item) for item in unique_data]
+    duplicates_count = len(jobs) - len(unique_data)
+
+    print(f"Remove {duplicates_count} duplicates.")
+    jobs = unique_data
+    with open(parent_dir+'/data/jobs.json', 'w') as file:
+        json.dump(jobs, file, indent=4)  
 
 
     jobs_processed = []

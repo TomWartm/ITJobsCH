@@ -29,7 +29,6 @@ def scrape_jobs_ch(driver: webdriver, jobs_path: str) -> None:
         jobs = []
         
     existing_urls = [item['url'] for item in jobs if "url" in item]
-    
     search_queries = ["software engineer", "data engineer", "data scientist"]
     for search_query in search_queries:
         new_job_urls = get_job_urls_jobs_ch(search_query, driver)
