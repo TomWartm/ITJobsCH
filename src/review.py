@@ -1,6 +1,6 @@
 import json
 import os
-import random
+import pandas as pd
 class JobReviewer:
     def __init__(self, jobs_file='data/jobs.json'):
         self.jobs = []
@@ -51,7 +51,8 @@ class JobReviewer:
                 print("Invalid input. Please enter a number between 0 and 9 or '.' to exit.")
     def review_random_jobs(self):
         # iterate over jobs with clean job_title
-        unreviewed_jobs = [job for job in self.jobs if ('reviewed' not in job or not job['reviewed']) ]
+        unreviewed_jobs = [job for job in self.jobs if ('reviewed' not in job or not job['reviewed']) and 'publication_date' in  job ]
+        unreviewed_jobs.sort(key=lambda x: pd.to_datetime(x['publication_date']).timestamp(), reverse=True)
         print("Jobs to review: {}".format(len(unreviewed_jobs)))
         for unreviewed_job in unreviewed_jobs:
             self.show_job(unreviewed_job)
