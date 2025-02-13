@@ -67,7 +67,7 @@ cs_job_categories = {
 programming_languages = {
     "Python", "Java", "C", "C#", "C++", "JavaScript", "TypeScript", "HTML", "CSS",
     "Go", "Rust", "Swift", "Kotlin", "Ruby", "PHP", "Scala", "Perl", "Lua", "Dart",
-    "R", "MATLAB", "Shell", "Bash", "PowerShell", "Objective-C", "SQL"
+    " R ", "MATLAB", "Shell", "Bash", "PowerShell", "Objective-C", "SQL"
 }
 
 frameworks = {
@@ -141,9 +141,10 @@ def extract_experience(job, description_text):
     ]
 
     # Handle general terms meaning "several years"
-    if any(term in description_text.lower() for term in ["mehrjährig", "langjährig", "viele jahre", "many years", "mehrere Jahre"]):
+    if any(term in description_text.lower() for term in ["mehrjährig", "langjährig", "viele jahre", "many years", "mehrere jahre", "einige jahre"]):
         years.add(2)  
-
+    if any(term in description_text.lower() for term in ["solide Kenntnisse"]):
+        years.add(1)  
     for pattern in experience_patterns:
         matches = re.findall(pattern, description_text, re.IGNORECASE)
         for match in matches:
@@ -205,15 +206,11 @@ parent_dir = os.path.dirname(os.path.dirname(__file__))
 
 with open(parent_dir+'/data/jobs.json', 'r') as file:
     jobs = json.load(file)
-with open(parent_dir+'/data/jobs2.json', 'r') as file:
-    jobs2 = json.load(file)
 
-# Total number of jobs to process
-total_jobs = len(jobs) + len(jobs2)
 
 jobs_processed = []
-for i, job in enumerate(jobs+jobs2):
-    print(f"Preprocessing {i}/{total_jobs}\n")
+for i, job in enumerate(jobs):
+    print(f"Preprocessing {i}/{len(jobs)}\n")
     descriptions_text = " ".join(
         " ".join(desc_list)
         for desc_dict in job["descriptions"]
