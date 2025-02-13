@@ -1,6 +1,7 @@
 import os
 import json
 import re
+from tqdm import tqdm
 # Define CS-related job keywords
 cs_job_categories = {
     "Software Engineer": {
@@ -27,7 +28,7 @@ cs_job_categories = {
         "Natural Language Processing Engineer", "Robotik Ingenieur", "Data Science", "Data & AI"
     },
     
-    "Cloud Engineer": {
+    "Cloud/System Engineer": {
         "Cloud Engineer", "Cloud Architect", "Site Reliability Engineer",
         "System Engineer", "Systemadministrator", "Cloud-Architekt", "SRE",
         "Systemingenieur", "Netzwerkadministrator", "Network Engineer", 
@@ -180,7 +181,6 @@ def extract_career_stage(job):
         if career_stage in job_title:
             career_stage_cleaned = career_stage
     
-
     job["career_stage_cleaned"] = career_stage_cleaned
     
 def extract_education_stage(job, description_text):
@@ -198,37 +198,34 @@ def extract_education_stage(job, description_text):
     
     
     
-    
-    
-    
-parent_dir = os.path.dirname(os.path.dirname(__file__))
+if __name__ == "__main__":
+    parent_dir = os.path.dirname(os.path.dirname(__file__))
 
 
-with open(parent_dir+'/data/jobs.json', 'r') as file:
-    jobs = json.load(file)
+    with open(parent_dir+'/data/jobs.json', 'r') as file:
+        jobs = json.load(file)
 
 
-jobs_processed = []
-for i, job in enumerate(jobs):
-    print(f"Preprocessing {i}/{len(jobs)}\n")
-    descriptions_text = " ".join(
-        " ".join(desc_list)
-        for desc_dict in job["descriptions"]
-        for desc_list in desc_dict.values()
-    )
-    if "job_title" in job:
-        extract_job_name(job)
-        extract_career_stage(job)
+    jobs_processed = []
+    for i, job in tqdm(enumerate(jobs), total=len(jobs), desc="Preprocessing Jobs", ncols=100):
         
+        descriptions_text = " ".join(
+            " ".join(desc_list)
+            for desc_dict in job["descriptions"]
+            for desc_list in desc_dict.values()
+        )
+        
+        if "job_title" in job:
+            extract_job_name(job)
+            extract_career_stage(job)
+            extract_keywords(job, descriptions_text)
+            extract_experience(job, descriptions_text)
+            extract_education_stage(job, descriptions_text)
             
-        extract_keywords(job, descriptions_text)
-        extract_experience(job, descriptions_text)
-        extract_education_stage(job, descriptions_text)
-        
-        jobs_processed.append(job)
+            jobs_processed.append(job)
 
 
-with open(parent_dir+'/data/jobs_processed.json', "w", encoding="utf-8") as file:
-    json.dump(jobs_processed, file, indent=4, ensure_ascii=False)
+    with open(parent_dir+'/data/jobs_processed.json', "w", encoding="utf-8") as file:
+        json.dump(jobs_processed, file, indent=4, ensure_ascii=False)
         
     
