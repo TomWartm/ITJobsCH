@@ -51,14 +51,17 @@ class JobReviewer:
                 print("Invalid input. Please enter a number between 0 and 9 or '.' to exit.")
     def review_random_jobs(self):
         # iterate over jobs with clean job_title
-        unreviewed_jobs = [job for job in self.jobs if ('reviewed' not in job or not job['reviewed']) and 'publication_date' in  job ]
+        unreviewed_jobs = [job for job in self.jobs if ('reviewed' not in job or not job['reviewed']) and 'publication_date' in  job and job['publication_date'] ]
         unreviewed_jobs.sort(key=lambda x: pd.to_datetime(x['publication_date']).timestamp(), reverse=True)
-        print("Jobs to review: {}".format(len(unreviewed_jobs)))
+        print(f"Jobs to review: {len(unreviewed_jobs)}")
+        i = 0
         for unreviewed_job in unreviewed_jobs:
+            i+=1
             self.show_job(unreviewed_job)
             do_continue =self.review_job(unreviewed_job)
             self.save_jobs()            
             if not do_continue:
+                print(f"Reviewed {i}/{len(unreviewed_jobs)} jobs.")
                 break
         else:
             print("No unreviewed jobs available.")

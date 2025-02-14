@@ -2,6 +2,8 @@ import os
 import json
 import re
 from tqdm import tqdm
+import pandas as pd
+
 # Define CS-related job keywords
 cs_job_categories = {
     "Software Engineer": {
@@ -15,7 +17,9 @@ cs_job_categories = {
         "Application Developer", "Automation Engineer", "Frontend Developer", "Backend Developer",
         "Application Engineer", "Software-Entwicklungsingenieur", "Front-End Engineer", "Research Engineer", 
         "Softwareentwickler", "Software Ingenieur", "Full Stack Developer", "Mobile App Ingenieur", "Mobile App Entwickler", "Java Entwickler",
-        "Java Fullstack","Entwickler:in", "Senior Developer", "Python Developer", "Applikations-Entwickler", "Software Development", "Full Stack Entwickler",
+        "Java Fullstack","Entwickler:in", "Senior Developer", "Python Developer", "Java Developer", "Angular Developer", 
+        "Applikations-Entwickler", "Software Development","Software-Developer", "Full Stack Entwickler", "Android Developer", "iOS Developer",
+        "Java Engineer",
     },
     
     "Data Engineer": {
@@ -25,7 +29,8 @@ cs_job_categories = {
         "Datenanalyst", "Dateningenieur", "Maschinelles Lernen Ingenieur", "Database Engineer", "Teamlead Data", "Data Architect", 
         "Data Warehouse Architect", "Data Warehouse Engineer","Data Integration Engineer","Datenbankarchitekt", "SQL-Entwickler", 
         "Datenbank Engineer", "Datenbank Spezialist", "Generative AI", "Computer Vision Engineer", "NLP Engineer", "Computer Vision Spezialist",
-        "Natural Language Processing Engineer", "Robotik Ingenieur", "Data Science", "Data & AI"
+        "Natural Language Processing Engineer", "Robotik Ingenieur", "Data Science", "Data & AI", "R&D", "wissenschaftliche Hilfskraft", "Large Language Models Engineer",
+        "3D Developer",
     },
     
     "Cloud/System Engineer": {
@@ -53,7 +58,7 @@ cs_job_categories = {
     
     
     "Design": {
-        "Design Engineer", "UX Designer", "UI Designer", "Product Designer"
+        "Design Engineer", "UX Designer", "UI Designer", "Product Designer", "UI/UX"
     },
     
     "Consulting & Management": {
@@ -109,7 +114,7 @@ cantons = [
     "LU", "Neuchatel", "NE", "Nidwalden", "NW", "Obwalden", "OW", "Schaffhausen", 
     "SH", "Schwyz", "SZ", "Solothurn", "SO", "St. Gallen", "SG", "Ticino", "TI", 
     "Thurgau", "TG", "Uri", "UR", "Valais", "VS", "Vaud", "VD", "Zug", "ZG", 
-    "Zürich", "ZH"
+    "Zürich", "ZH", "Sitten"
 ]
 
 # Create a dictionary of abbreviations mapping to full canton names
@@ -120,7 +125,7 @@ canton_dict = {
     "NE": "Neuchatel", "NW": "Nidwalden", "OW": "Obwalden", "SH": "Schaffhausen", 
     "SZ": "Schwyz", "SO": "Solothurn", "SG": "St. Gallen", "TI": "Ticino", 
     "TG": "Thurgau", "UR": "Uri", "VS": "Valais", "VD": "Vaud", "ZG": "Zug", 
-    "ZH": "Zürich"
+    "ZH": "Zürich", "Sitten": "Valais"
 }
 
 def extract_keywords(job, description_text):
@@ -235,21 +240,31 @@ if __name__ == "__main__":
     parent_dir = os.path.dirname(os.path.dirname(__file__))
 
 
+    file_path = os.path.join(parent_dir, 'data', 'jobs.json')
+
+    # drop duplicates in jobs.json
+    df = pd.read_json(file_path)
+
+    initial_count = len(df)
+
+    df_unique_url = df.drop_duplicates(subset=['url'])
+    removed_url_duplicates = initial_count - len(df_unique_url)
+
+
+    df_final = df_unique_url.drop_duplicates(subset=['company', 'job_title'])
+    removed_company_job_title_duplicates = len(df_unique_url) - len(df_final)
+
+    total_duplicates_removed = removed_url_duplicates + removed_company_job_title_duplicates
+
+    df_final.to_json(file_path, orient='records', indent=4)
+
+    print(f"Total duplicates removed: {total_duplicates_removed}")
+    print(f" - Duplicates removed based on URL: {removed_url_duplicates}")
+    print(f" - Duplicates removed based on Company & Job Title: {removed_company_job_title_duplicates}")
+
     with open(parent_dir+'/data/jobs.json', 'r') as file:
         jobs = json.load(file)
         
-    # Remove duplicates by converting dicts to sorted tuples of items
-    unique_data = list({json.dumps(item, sort_keys=True) for item in jobs})
-
-    unique_data = [json.loads(item) for item in unique_data]
-    duplicates_count = len(jobs) - len(unique_data)
-
-    print(f"Remove {duplicates_count} duplicates.")
-    jobs = unique_data
-    with open(parent_dir+'/data/jobs.json', 'w') as file:
-        json.dump(jobs, file, indent=4)  
-
-
     jobs_processed = []
     for i, job in tqdm(enumerate(jobs), total=len(jobs), desc="Preprocessing Jobs", ncols=100):
         
@@ -259,7 +274,7 @@ if __name__ == "__main__":
             for desc_list in desc_dict.values()
         )
         
-        if "job_title" in job:
+        if "job_title" in job and job["job_title"]:
             extract_job_name(job)
             extract_career_stage(job)
             extract_canton(job)

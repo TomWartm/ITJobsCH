@@ -42,15 +42,22 @@ glimpse(df)
 ## Visualize
 ```{r, error=TRUE, warning=TRUE}
 df %>%
-  # Count all listings per publication_date
   count(publication_date) %>%
   ggplot(aes(publication_date, n)) +
-  geom_line(aes(color = "All Listings"), linewidth = 1) +  # Line for all listings
+  geom_line(aes(color = "All Listings"), linewidth = 1, alpha=0.5) +  # Line for all listings
   geom_line(data = df %>% filter(reviewed == TRUE) %>% count(publication_date), 
-            aes(publication_date, n, color = "Reviewed Listings"), linewidth = 1) +  # Line for reviewed listings
+            aes(publication_date, n, color = "Reviewed Listings"), linewidth = 1, alpha=0.5) +  # Line for reviewed listings
   labs(title = "Number of scraped IT Job Listings per Day",
        x = "Date",
        y = "") +
     scale_color_manual(name = "Legend", values = c("All Listings" = "blue", "Reviewed Listings" = "red"))
+
+```
+```{r, error=TRUE, warning=TRUE}
+df %>%
+  ggplot() +
+  geom_bar(mapping=aes(x=rating))+
+  labs(x = "Rating",
+       y = "Count") 
 
 ```
