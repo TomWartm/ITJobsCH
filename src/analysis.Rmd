@@ -1,0 +1,56 @@
+# Analysis
+Data Visualiization and Analysis from the data collected in the previous steps from jobs.ch and itjobs.ch. 
+Some of the job listings are rated from a scale from 0,9 according to my interests and qualifications.
+
+## Import Data
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(jsonlite)
+library(lubridate)
+```
+```{r}
+
+raw_df <- fromJSON("../data/jobs_processed.json")
+raw_df <- bind_rows(raw_df)
+glimpse(raw_df)
+
+```
+
+## Clean Data
+```{r, error=TRUE, warning=TRUE}
+# convert datatypes
+df <- raw_df %>%
+    mutate(publication_date = dmy(publication_date), 
+        job_title_cleaned = factor(job_title_cleaned),
+        career_stage_cleaned = factor(career_stage_cleaned),
+        canton = factor(canton),
+        programming_languages = lapply(programming_languages, factor),
+        frameworks = lapply(frameworks, factor),
+        tools = lapply(tools, factor),
+        operating_systems = lapply(operating_systems, factor),
+        max_years = sapply(years, function(x) if (length(x) == 0) 0 else max(as.numeric(x), na.rm = TRUE))) # get min number of years, and replace nan with 0
+
+# drop NaN rows
+df <- df %>%
+    filter(!is.na(job_title_cleaned) & !is.na(publication_date))%>%# drop rows with no cleaned job title or publication date, since they are probably no IT related jobs or web-scraping went wrong
+    filter(publication_date > as.Date("2025-01-01"))
+
+    
+glimpse(df)
+```
+
+## Visualize
+```{r, error=TRUE, warning=TRUE}
+df %>%
+  # Count all listings per publication_date
+  count(publication_date) %>%
+  ggplot(aes(publication_date, n)) +
+  geom_line(aes(color = "All Listings"), linewidth = 1) +  # Line for all listings
+  geom_line(data = df %>% filter(reviewed == TRUE) %>% count(publication_date), 
+            aes(publication_date, n, color = "Reviewed Listings"), linewidth = 1) +  # Line for reviewed listings
+  labs(title = "Number of scraped IT Job Listings per Day",
+       x = "Date",
+       y = "") +
+    scale_color_manual(name = "Legend", values = c("All Listings" = "blue", "Reviewed Listings" = "red"))
+
+```
