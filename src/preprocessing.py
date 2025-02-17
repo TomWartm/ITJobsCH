@@ -19,7 +19,9 @@ cs_job_categories = {
         "Softwareentwickler", "Software Ingenieur", "Full Stack Developer", "Mobile App Ingenieur", "Mobile App Entwickler", "Java Entwickler",
         "Java Fullstack","Entwickler:in", "Senior Developer", "Python Developer", "Java Developer", "Angular Developer", 
         "Applikations-Entwickler", "Software Development","Software-Developer", "Full Stack Entwickler", "Android Developer", "iOS Developer",
-        "Java Engineer",
+        "Java Engineer", ".NET Engineer", "C# Engineer", "C++ Engineer", "C Engineer", "C# Developer", "C++ Developer", "C Developer", 
+        "C# Entwickler", "C++ Entwickler", "C Entwickler", "Full Stack", "Linux"
+        
     },
     
     "Data Engineer": {
@@ -30,14 +32,15 @@ cs_job_categories = {
         "Data Warehouse Architect", "Data Warehouse Engineer","Data Integration Engineer","Datenbankarchitekt", "SQL-Entwickler", 
         "Datenbank Engineer", "Datenbank Spezialist", "Generative AI", "Computer Vision Engineer", "NLP Engineer", "Computer Vision Spezialist",
         "Natural Language Processing Engineer", "Robotik Ingenieur", "Data Science", "Data & AI", "R&D", "wissenschaftliche Hilfskraft", "Large Language Models Engineer",
-        "3D Developer", "GIS-Spezialist", "Data Specialist", "Data management", "Datenmanagement", 
+        "3D Developer", "GIS-Spezialist", "Data Specialist", "Data management", "Datenmanagement", "Data-Engineer", "Data-Architect", "AI Developer",
+        
     },
     
     "Cloud/System Engineer": {
         "Cloud Engineer", "Cloud Architect", "Site Reliability Engineer",
         "System Engineer", "Systemadministrator", "Cloud-Architekt", "SRE",
         "Systemingenieur", "Netzwerkadministrator", "Network Engineer", 
-         "Cloud Systems Engineer"
+         "Cloud Systems Engineer", "ICT-Infrastruktur", "ICT Architect", 
     },
     
     "Security Engineer": {
@@ -74,7 +77,7 @@ cs_job_categories = {
 programming_languages = {
     "Python", "Java", "C", "C#", "C++", "JavaScript", "TypeScript", "HTML", "CSS",
     "Go", "Rust", "Swift", "Kotlin", "Ruby", "PHP", "Scala", "Perl", "Lua", "Dart",
-    " R ", "MATLAB", "Shell", "Bash", "PowerShell", "Objective-C", "SQL"
+    " R ", "MATLAB", "Shell", "Bash", "PowerShell", "Objective-C", "SQL", "SCL"
 }
 
 frameworks = {

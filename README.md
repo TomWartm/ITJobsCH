@@ -35,7 +35,7 @@ Alternatively, you can skip this step and use the already preprocessed data in `
 ```bash
 python src/preprocessing.py
 ```
-Note: if you change `preprocessing.py`, you should delete `jobs_preprocessed.json` and run it again. 
+Warning: if you change `preprocessing.py`, you should delete `jobs_preprocessed.json` and run it again. Howeer, you will loose your ratings on the jobs.
 
 ### 4. Review jobs
 You can review the downloaded jobs by running `src/review.py`. This each downloaded job (that is not rated so far) and the user can rate the job from 0-9.
