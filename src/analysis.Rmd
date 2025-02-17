@@ -13,7 +13,6 @@ library(lubridate)
 raw_df <- fromJSON("../data/jobs_processed.json")
 raw_df <- bind_rows(raw_df)
 glimpse(raw_df)
-
 ```
 
 ## Clean Data
@@ -33,6 +32,14 @@ df <- raw_df %>%
 colSums(is.na(df))
 
 ```
+
+Check if some IT key words in listing title were missed during preprocessing, and therefore have a NaN value in the `job_title_cleaned` attribute. 
+```{r, error=TRUE, warning=TRUE}
+df %>%
+  filter(is.na(job_title_cleaned)) %>%
+  slice_head(n = 20) %>%
+  pull(job_title) 
+```
 ```{r, error=TRUE, warning=TRUE}
 # drop NaN rows
 df <- df %>%
@@ -43,6 +50,7 @@ df <- df %>%
     
 glimpse(df)
 ```
+
 
 
 ## Visualize
@@ -91,4 +99,16 @@ df %>%
     geom_bar(stat = "identity", alpha = 0.7) +
     labs(x = "Count", y = "Programming Language")
 
+```
+```{r, error=TRUE, warning=TRUE}
+df %>%
+    count(search_query) 
+```
+```{r, error=TRUE, warning=TRUE}
+df %>%
+    count(job_title_cleaned) 
+```
+```{r, error=TRUE, warning=TRUE}
+df %>%
+    count(job_category) 
 ```
