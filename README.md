@@ -1,16 +1,12 @@
 # Job Market Insights
 This is a script that scrapes [jobs.ch](https://www.jobs.ch/en/) and [itjobs.ch](https://www.itjobs.ch/jobs/), based on keywords related to IT, to summarize, visualize, and filter interesting jobs.
 
-**Last Data Downloaded:** 13 February, 2025
+**Last Data Downloaded:** 17 February, 2025
 
-
-## Data Summary
-Visualizations of published IT related jobs from jobs.ch and itjobs.ch 
-### Publication Date
-![Plot of Publication Date Distribution](plots/time.png)
+![Plot of Publication Date Distribution](src/analysis_files/figure-gfm/time-jobs-1.png)
 * A line plot showing the daily count of publications since 1.1.2025.
 
-For more analysis, see `src/analysis.ipynb`
+For more analysis, see `src/analysis.md`
 
 ## ** Instructions**
 ### 1. Create and Activate the Conda Environment
@@ -42,4 +38,5 @@ You can review the downloaded jobs by running `src/review.py`. This each downloa
 ```bash
 python src/review.py
 ```
+
 

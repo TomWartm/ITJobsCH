@@ -21,7 +21,7 @@ glimpse(raw_df)
 ## Clean Data
 ```{r, error=TRUE, warning=TRUE}
 # convert datatypes
-df <- raw_df %>%
+clean_df <- raw_df %>%
     mutate(publication_date = dmy(publication_date), 
         job_title_cleaned = factor(job_title_cleaned),
         career_stage_cleaned = factor(career_stage_cleaned),
@@ -32,20 +32,20 @@ df <- raw_df %>%
         operating_systems = lapply(operating_systems, factor),
         max_years = sapply(years, function(x) if (length(x) == 0) NaN else max(as.numeric(x), na.rm = TRUE))) # get min number of years, and replace nan with 0
 
-colSums(is.na(df))
+colSums(is.na(clean_df))
 
 ```
 
 Check if some IT key words in listing title were missed during preprocessing, and therefore have a NaN value in the `job_title_cleaned` attribute. 
 ```{r, error=TRUE, warning=TRUE}
-df %>%
+clean_df %>%
   filter(is.na(job_title_cleaned)) %>%
   slice_head(n = 20) %>%
   pull(job_title) 
 ```
 ```{r, error=TRUE, warning=TRUE}
 # drop NaN rows
-df <- df %>%
+df <- clean_df %>%
     filter(!is.na(job_title_cleaned) & !is.na(publication_date))%>%# drop rows with no cleaned job title, since they are probably no IT related jobs 
     filter(publication_date > as.Date("2025-01-01"))%>%
     filter(max_years <= 20) # outliers
@@ -57,17 +57,18 @@ glimpse(df)
 
 
 ## Visualize
-```{r, error=TRUE, warning=TRUE}
+```{r, time-jobs, error=TRUE, warning=TRUE}
 df %>%
-  count(publication_date) %>%
-  ggplot(aes(publication_date, n)) +
-  geom_line(aes(color = "All Listings"), linewidth = 1, alpha=0.5) +  # Line for all listings
-  geom_line(data = df %>% filter(reviewed == TRUE) %>% count(publication_date), 
+    count(publication_date) %>%
+    ggplot(aes(publication_date, n)) +
+    geom_line(aes(color = "All Listings"), linewidth = 1, alpha=0.5) +  # Line for all listings
+    geom_line(data = df %>% filter(reviewed == TRUE) %>% count(publication_date), 
             aes(publication_date, n, color = "Reviewed Listings"), linewidth = 1, alpha=0.5) +  # Line for reviewed listings
-  labs(title = "Number of scraped IT Job Listings per Day",
-       x = "Date",
-       y = "") +
-    scale_color_manual(name = "Legend", values = c("All Listings" = "blue", "Reviewed Listings" = "red"))
+    geom_point(aes(publication_date, n), alpha=0.5)+
+    labs(title = "Number of scraped IT Job Listings per Day",
+        x = "Date",
+        y = "") +
+    scale_color_manual(name = "Legend", values = c("All Listings" = "blue", "Reviewed Listings" = "green"))
 
 ```
 ```{r, error=TRUE, warning=TRUE}
@@ -105,13 +106,47 @@ df %>%
 ```
 ```{r, error=TRUE, warning=TRUE}
 df %>%
+    unnest(programming_languages) %>% 
+    ggplot(aes(x = rating , y = programming_languages)) +
+    geom_boxplot() +
+    labs(x = "Rating", y = "Programming Languages")
+```
+```{r, error=TRUE, warning=TRUE}
+df %>%
     count(search_query) 
 ```
 ```{r, error=TRUE, warning=TRUE}
 df %>%
-    count(job_title_cleaned) 
+    count(job_title_cleaned) %>%
+    arrange(desc(n))
 ```
 ```{r, error=TRUE, warning=TRUE}
 df %>%
-    count(job_category) 
+    count(job_category) %>%
+    ggplot(aes(x = n, y = job_category)) +
+    geom_bar(stat = "identity")
+
 ```
+```{r, error=TRUE, warning=TRUE}
+df %>%
+    ggplot(aes(x = rating , y = job_category)) +
+    geom_boxplot(alpha = 0.7) +
+    labs(x = "Rating", y = "Job Category")
+```
+```{r, error=TRUE, warning=TRUE}
+df %>%
+    ggplot(aes(x = rating , y = canton)) +
+    geom_boxplot(alpha = 0.7) +
+    labs(x = "Rating", y = "Canton")
+```
+
+```{r, error=TRUE, warning=TRUE}
+df %>%
+    ggplot(aes(x = max_years, y = rating )) +
+    geom_point(alpha = 0.7) +
+    geom_smooth(method = "lm", se = FALSE, color = "blue") +
+    labs(x = "Max Years of Experience", y = " Rating", title = "Correlation between Rating and Max Years of Experience")
+```
+
+
+

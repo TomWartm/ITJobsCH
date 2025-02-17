@@ -171,7 +171,7 @@ df %>%
     scale_color_manual(name = "Legend", values = c("All Listings" = "blue", "Reviewed Listings" = "red"))
 ```
 
-![](analysis_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](analysis_files/figure-gfm/time-jobs-1.png)<!-- -->
 
 ``` r
 df %>%
@@ -183,7 +183,7 @@ df %>%
 
     ## Warning: Removed 221 rows containing non-finite values (`stat_count()`).
 
-![](analysis_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](analysis_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 ``` r
 df %>%
@@ -193,7 +193,7 @@ df %>%
        x = "Count") 
 ```
 
-![](analysis_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](analysis_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ``` r
 p <- ggplot(df, aes(max_years, career_stage_cleaned))  +
@@ -203,7 +203,7 @@ p <- ggplot(df, aes(max_years, career_stage_cleaned))  +
 print(p)
 ```
 
-![](analysis_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](analysis_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 ``` r
 df %>%
@@ -214,7 +214,7 @@ df %>%
     labs(x = "Count", y = "Programming Language")
 ```
 
-![](analysis_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](analysis_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 ``` r
 df %>%
