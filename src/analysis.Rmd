@@ -28,16 +28,22 @@ df <- raw_df %>%
         frameworks = lapply(frameworks, factor),
         tools = lapply(tools, factor),
         operating_systems = lapply(operating_systems, factor),
-        max_years = sapply(years, function(x) if (length(x) == 0) 0 else max(as.numeric(x), na.rm = TRUE))) # get min number of years, and replace nan with 0
+        max_years = sapply(years, function(x) if (length(x) == 0) NaN else max(as.numeric(x), na.rm = TRUE))) # get min number of years, and replace nan with 0
 
+colSums(is.na(df))
+
+```
+```{r, error=TRUE, warning=TRUE}
 # drop NaN rows
 df <- df %>%
-    filter(!is.na(job_title_cleaned) & !is.na(publication_date))%>%# drop rows with no cleaned job title or publication date, since they are probably no IT related jobs or web-scraping went wrong
-    filter(publication_date > as.Date("2025-01-01"))
+    filter(!is.na(job_title_cleaned) & !is.na(publication_date))%>%# drop rows with no cleaned job title, since they are probably no IT related jobs 
+    filter(publication_date > as.Date("2025-01-01"))%>%
+    filter(max_years <= 20) # outliers
 
     
 glimpse(df)
 ```
+
 
 ## Visualize
 ```{r, error=TRUE, warning=TRUE}
@@ -56,8 +62,33 @@ df %>%
 ```{r, error=TRUE, warning=TRUE}
 df %>%
   ggplot() +
-  geom_bar(mapping=aes(x=rating))+
+  geom_bar(mapping=aes(x=rating), alpha = 0.7)+
   labs(x = "Rating",
        y = "Count") 
+
+```
+```{r, error=TRUE, warning=TRUE}
+df %>%
+  ggplot() +
+  geom_bar(mapping=aes(y=job_category), alpha = 0.7)+
+  labs(y = "Job Category",
+       x = "Count") 
+
+```
+```{r, error=TRUE, warning=TRUE}
+p <- ggplot(df, aes(max_years, career_stage_cleaned))  +
+    geom_boxplot() +
+    labs(y = "Career Stage",
+        x = "Min years of experience") 
+print(p)
+```
+
+```{r, error=TRUE, warning=TRUE}
+df %>%
+    unnest(programming_languages) %>%         # Unnest the list column
+    count(programming_languages) %>%           # Count occurrences of each language
+    ggplot(aes(x = n, y = programming_languages)) +  
+    geom_bar(stat = "identity", alpha = 0.7) +
+    labs(x = "Count", y = "Programming Language")
 
 ```

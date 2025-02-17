@@ -30,7 +30,7 @@ cs_job_categories = {
         "Data Warehouse Architect", "Data Warehouse Engineer","Data Integration Engineer","Datenbankarchitekt", "SQL-Entwickler", 
         "Datenbank Engineer", "Datenbank Spezialist", "Generative AI", "Computer Vision Engineer", "NLP Engineer", "Computer Vision Spezialist",
         "Natural Language Processing Engineer", "Robotik Ingenieur", "Data Science", "Data & AI", "R&D", "wissenschaftliche Hilfskraft", "Large Language Models Engineer",
-        "3D Developer",
+        "3D Developer", "GIS-Spezialist", "Data Specialist", "Data management", "Datenmanagement", 
     },
     
     "Cloud/System Engineer": {
@@ -65,7 +65,8 @@ cs_job_categories = {
         "IT-Consultant", "IT-Berater", "Technischer Berater", "Projektmanager IT",
         "IT-Projektleiter", "Technischer Produktmanager", "Technical Lead", 
         "Requirements Engineer", "Middleware Engineer", "Application-Manager", "IT-Security Manager", "Lead Architect", 
-        "Solution Engineer", "Requirement Engineer", "Projektleiter:in", "IT Management", "Salesforce Engineer", "Cyber Security Consultant", "Cloud Consultant"
+        "Solution Engineer", "Requirement Engineer", "Projektleiter:in", "IT Management", "Salesforce Engineer", "Cyber Security Consultant", "Cloud Consultant",
+        "Wirtschaftsinformatiker", "IT Application Manager", 
     }
 }
 
@@ -242,32 +243,31 @@ if __name__ == "__main__":
 
     file_path = os.path.join(parent_dir, 'data', 'jobs.json')
 
-    # drop duplicates in jobs.json
+    # count duplicates in jobs.json
     df = pd.read_json(file_path)
 
     initial_count = len(df)
 
-    df_unique_url = df.drop_duplicates(subset=['url'])
-    removed_url_duplicates = initial_count - len(df_unique_url)
+    removed_url_duplicates = df.duplicated(subset=['url']).sum()
+    removed_company_job_title_duplicates = df.duplicated(subset=['company', 'job_title']).sum()
 
+    total_duplicates = removed_url_duplicates + removed_company_job_title_duplicates
 
-    df_final = df_unique_url.drop_duplicates(subset=['company', 'job_title'])
-    removed_company_job_title_duplicates = len(df_unique_url) - len(df_final)
-
-    total_duplicates_removed = removed_url_duplicates + removed_company_job_title_duplicates
-
-    df_final.to_json(file_path, orient='records', indent=4)
-
-    print(f"Total duplicates removed: {total_duplicates_removed}")
-    print(f" - Duplicates removed based on URL: {removed_url_duplicates}")
-    print(f" - Duplicates removed based on Company & Job Title: {removed_company_job_title_duplicates}")
+    print(f"Total duplicate entries: {total_duplicates}")
+    print(f" - Duplicate entries based on URL (should be Zero, since we only download non duplicate urls): {removed_url_duplicates}")
+    print(f" - Duplicate entries based on Company & Job Title: {removed_company_job_title_duplicates}")
 
     with open(parent_dir+'/data/jobs.json', 'r') as file:
         jobs = json.load(file)
-        
-    jobs_processed = []
+
+    with open(parent_dir+'/data/jobs_processed.json', 'r', encoding="utf-8") as file:
+        jobs_processed = json.load(file)
+    
+    processed_urls = [item['url'] for item in jobs_processed if "url" in item]
+    
     for i, job in tqdm(enumerate(jobs), total=len(jobs), desc="Preprocessing Jobs", ncols=100):
-        
+        if job['url'] in processed_urls:
+            continue
         descriptions_text = " ".join(
             " ".join(desc_list)
             for desc_dict in job["descriptions"]

@@ -37,6 +37,7 @@ def scrape_jobs_ch(driver: webdriver, jobs_path: str) -> None:
             for new_url in new_job_urls:
                 if new_url not in existing_urls:
                     jobs.append({"url": new_url, "downloaded": False, "search_query": search_query, "website": "Jobs"})
+                    existing_urls.append(new_url)
             json.dump(jobs, file, indent=4)
     
     # download data
@@ -75,6 +76,7 @@ def scrape_itjobs_ch(driver: webdriver, jobs_path: str) -> None:
         for new_url in new_job_urls:
             if new_url not in existing_urls:
                 jobs.append({"url": new_url, "downloaded": False, "search_query": "all jobs", "website": "ITJobs"})
+                existing_urls.append(new_url)
         json.dump(jobs, file, indent=4)
     
     
