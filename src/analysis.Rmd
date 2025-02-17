@@ -1,4 +1,7 @@
-# Analysis
+---
+title: "Data Analysis of IT jobs"
+output: rmarkdown::github_document
+---
 Data Visualiization and Analysis from the data collected in the previous steps from jobs.ch and itjobs.ch. 
 Some of the job listings are rated from a scale from 0,9 according to my interests and qualifications.
 
