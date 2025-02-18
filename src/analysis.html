@@ -1034,31 +1034,6 @@ preprocessing, and therefore have a NaN value in the
 ##   (64 observations deleted due to missingness)
 ## Multiple R-squared:  0.8955, Adjusted R-squared:  0.603 
 ## F-statistic: 3.061 on 14 and 5 DF,  p-value: 0.1114</code></pre>
-<h2 id="predict">Predict</h2>
-<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>df_to_predict_no_url <span class="ot">&lt;-</span> df_to_predict <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span>url)</span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Align factor levels with training data</span></span>
-<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (col <span class="cf">in</span> <span class="fu">names</span>(df_to_predict_no_url)) {</span>
-<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.factor</span>(df_to_predict_no_url[[col]])) {</span>
-<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>    df_to_predict_no_url[[col]] <span class="ot">&lt;-</span> <span class="fu">factor</span>(df_to_predict_no_url[[col]], <span class="at">levels =</span> <span class="fu">levels</span>(<span class="fu">droplevels</span>(train[[col]])))</span>
-<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Make predictions </span></span>
-<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>predictions <span class="ot">&lt;-</span> <span class="fu">predict</span>(model, <span class="at">newdata =</span> df_to_predict_no_url)</span></code></pre></div>
-<pre><code>## Error in model.frame.default(Terms, newdata, na.action = na.action, xlev = object$xlevels): object is not a matrix</code></pre>
-<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>df_to_predict<span class="sc">$</span>predicted_rating <span class="ot">&lt;-</span> predictions</span></code></pre></div>
-<pre><code>## Error in eval(expr, envir, enclos): object &#39;predictions&#39; not found</code></pre>
-<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>highest_predicted_ratings <span class="ot">&lt;-</span> df_to_predict <span class="sc">%&gt;%</span></span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(<span class="fu">desc</span>(predicted_rating))<span class="sc">%&gt;%</span></span>
-<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(url, predicted_rating) <span class="sc">%&gt;%</span></span>
-<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>)  </span></code></pre></div>
-<pre><code>## Error in `arrange()`:
-## i In argument: `..1 = predicted_rating`.
-## Caused by error:
-## ! object &#39;predicted_rating&#39; not found</code></pre>
-<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>highest_predicted_ratings</span></code></pre></div>
-<pre><code>## Error in eval(expr, envir, enclos): object &#39;highest_predicted_ratings&#39; not found</code></pre>
 
 </body>
 </html>
