@@ -29,8 +29,8 @@ glimpse(raw_df)
     ## $ language              <chr> NA, NA, NA, NA, NA, NA, NA, NA, "German (Interme~
     ## $ place_of_work         <chr> NA, "Root D4", NA, "Ringstrasse 39, 4106 Therwil~
     ## $ publication_date      <chr> NA, "06 February 2025", NA, "07 February 2025", ~
-    ## $ rating                <dbl> NA, NA, NA, 6, NA, NA, NA, NA, NA, NA, NA, 4, NA~
-    ## $ reviewed              <dbl> NA, NA, NA, 1, NA, NA, NA, NA, NA, NA, NA, 1, NA~
+    ## $ rating                <dbl> NA, 2, NA, 6, NA, NA, NA, NA, NA, NA, NA, 4, NA,~
+    ## $ reviewed              <dbl> NA, 1, NA, 1, NA, NA, NA, NA, NA, NA, NA, 1, NA,~
     ## $ salary                <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ~
     ## $ search_query          <chr> "data engineer", "all jobs", "software engineer"~
     ## $ url                   <chr> "https://www.jobs.ch/en/vacancies/detail/221d09c~
@@ -51,7 +51,7 @@ glimpse(raw_df)
 
 ``` r
 # convert datatypes
-df <- raw_df %>%
+clean_df <- raw_df %>%
     mutate(publication_date = dmy(publication_date), 
         job_title_cleaned = factor(job_title_cleaned),
         career_stage_cleaned = factor(career_stage_cleaned),
@@ -60,9 +60,11 @@ df <- raw_df %>%
         frameworks = lapply(frameworks, factor),
         tools = lapply(tools, factor),
         operating_systems = lapply(operating_systems, factor),
-        max_years = sapply(years, function(x) if (length(x) == 0) NaN else max(as.numeric(x), na.rm = TRUE))) # get min number of years, and replace nan with 0
-
-colSums(is.na(df))
+        max_years = sapply(years, function(x) if (length(x) == 0) NA else max(as.numeric(x), na.rm = TRUE)), # get min number of years, and replace nan with 0
+        programming_languages = ifelse(lengths(programming_languages) == 0, "No Programming Languages", programming_languages),
+        frameworks = ifelse(lengths(frameworks) == 0, "No Frameworks", frameworks),
+        tools = ifelse(lengths(tools) == 0, "No Tools", tools))
+colSums(is.na(clean_df))
 ```
 
     ##               company         contract_type          descriptions 
@@ -70,9 +72,9 @@ colSums(is.na(df))
     ##            downloaded             job_title              language 
     ##                     0                     0                  2913 
     ##         place_of_work      publication_date                rating 
-    ##                  2077                  2084                  3518 
+    ##                  2077                  2084                  3463 
     ##              reviewed                salary          search_query 
-    ##                  3518                  3815                     0 
+    ##                  3463                  3815                     0 
     ##                   url               website              workload 
     ##                     0                  2525                  2642 
     ##  career_stage_cleaned                canton programming_languages 
@@ -89,7 +91,7 @@ preprocessing, and therefore have a NaN value in the `job_title_cleaned`
 attribute.
 
 ``` r
-df %>%
+clean_df %>%
   filter(is.na(job_title_cleaned)) %>%
   slice_head(n = 20) %>%
   pull(job_title) 
@@ -118,7 +120,7 @@ df %>%
 
 ``` r
 # drop NaN rows
-df <- df %>%
+df <- clean_df %>%
     filter(!is.na(job_title_cleaned) & !is.na(publication_date))%>%# drop rows with no cleaned job title, since they are probably no IT related jobs 
     filter(publication_date > as.Date("2025-01-01"))%>%
     filter(max_years <= 20) # outliers
@@ -146,9 +148,9 @@ glimpse(df)
     ## $ workload              <chr> "80 – 100%", "100%", "100%", "80 – 100%", "80 – ~
     ## $ career_stage_cleaned  <fct> NA, NA, NA, NA, NA, NA, senior, NA, NA, NA, NA, ~
     ## $ canton                <fct> Zürich, NA, NA, NA, NA, NA, NA, NA, Schaffhausen~
-    ## $ programming_languages <list> <Java, SQL>, <C, C++>, <>, <C#, Python>, SQL, <~
-    ## $ frameworks            <list> <Angular, Spring>, <>, <>, React, <>, <>, <>, <~
-    ## $ tools                 <list> <Git, Jenkins>, <>, <>, <CI/CD, Docker, Kuberne~
+    ## $ programming_languages <list> <Java, SQL>, <C, C++>, "No Programming Language~
+    ## $ frameworks            <list> <Angular, Spring>, "No Frameworks", "No Framewo~
+    ## $ tools                 <list> <Git, Jenkins>, "No Tools", "No Tools", <CI/CD,~
     ## $ operating_systems     <list> <>, <>, <>, <>, <>, <>, <>, <>, <>, <>, <>, <>,~
     ## $ years                 <list> 5, 2, 4, 3, 5, 3, <3, 5>, 2, 3, 2, <3, 5>, 5, 3~
     ## $ education             <list> "Vocational", <>, "Vocational", <>, <>, "PhD", ~
@@ -160,15 +162,16 @@ glimpse(df)
 
 ``` r
 df %>%
-  count(publication_date) %>%
-  ggplot(aes(publication_date, n)) +
-  geom_line(aes(color = "All Listings"), linewidth = 1, alpha=0.5) +  # Line for all listings
-  geom_line(data = df %>% filter(reviewed == TRUE) %>% count(publication_date), 
+    count(publication_date) %>%
+    ggplot(aes(publication_date, n)) +
+    geom_line(aes(color = "All Listings"), linewidth = 1, alpha=0.5) +  # Line for all listings
+    geom_line(data = df %>% filter(reviewed == TRUE) %>% count(publication_date), 
             aes(publication_date, n, color = "Reviewed Listings"), linewidth = 1, alpha=0.5) +  # Line for reviewed listings
-  labs(title = "Number of scraped IT Job Listings per Day",
-       x = "Date",
-       y = "") +
-    scale_color_manual(name = "Legend", values = c("All Listings" = "blue", "Reviewed Listings" = "red"))
+    geom_point(aes(publication_date, n), alpha=0.5)+
+    labs(title = "Number of scraped IT Job Listings per Day",
+        x = "Date",
+        y = "") +
+    scale_color_manual(name = "Legend", values = c("All Listings" = "blue", "Reviewed Listings" = "green"))
 ```
 
 ![](analysis_files/figure-gfm/time-jobs-1.png)<!-- -->
@@ -181,7 +184,7 @@ df %>%
        y = "Count") 
 ```
 
-    ## Warning: Removed 221 rows containing non-finite values (`stat_count()`).
+    ## Warning: Removed 205 rows containing non-finite values (`stat_count()`).
 
 ![](analysis_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
@@ -218,6 +221,18 @@ df %>%
 
 ``` r
 df %>%
+    unnest(programming_languages) %>% 
+    ggplot(aes(x = rating , y = programming_languages)) +
+    geom_boxplot() +
+    labs(x = "Rating", y = "Programming Languages")
+```
+
+    ## Warning: Removed 353 rows containing non-finite values (`stat_boxplot()`).
+
+![](analysis_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+
+``` r
+df %>%
     count(search_query) 
 ```
 
@@ -229,82 +244,198 @@ df %>%
 
 ``` r
 df %>%
-    count(job_title_cleaned) 
+    count(job_title_cleaned) %>%
+    arrange(desc(n))
 ```
 
     ##            job_title_cleaned  n
-    ## 1                AI Engineer  2
-    ## 2          Angular Developer  1
-    ## 3       Application Engineer  7
-    ## 4     Applikationsentwickler  2
-    ## 5        Automation Engineer  9
-    ## 6          Backend Developer  2
-    ## 7           Backend Engineer  1
-    ## 8            Cloud-Architekt  1
-    ## 9            Cloud Architect  1
-    ## 10            Cloud Engineer  5
-    ## 11           Computer Vision  1
-    ## 12    Cybersecurity Engineer  1
-    ## 13                 Data & AI  1
-    ## 14              Data Analyst  6
-    ## 15            Data Architect  1
-    ## 16             Data Engineer 10
-    ## 17            Data Scientist  2
-    ## 18         Database Engineer  1
-    ## 19           Design Engineer  5
-    ## 20           DevOps Engineer 10
-    ## 21             Entwickler:in  8
-    ## 22        Frontend Developer  5
-    ## 23         Frontend Engineer  2
-    ## 24      Full Stack Developer  2
-    ## 25       Fullstack Developer  1
-    ## 26        Fullstack Engineer  3
-    ## 27      Fullstack Entwickler  2
-    ## 28             ICT-Architekt  3
-    ## 29             ICT Architekt  3
-    ## 30       IT-Security Manager  1
-    ## 31             IT Management  1
-    ## 32            Java Developer  1
-    ## 33       Middleware Engineer  1
-    ## 34          Network Engineer  6
-    ## 35         Platform Engineer  4
-    ## 36          Projektleiter:in  3
-    ## 37                       R&D  2
-    ## 38     Requirements Engineer  5
-    ## 39         Research Engineer  1
-    ## 40       Salesforce Engineer  1
-    ## 41         Security Engineer  9
-    ## 42          Senior Developer  2
-    ## 43 Site Reliability Engineer  3
-    ## 44       Software-Entwickler  1
-    ## 45        Software Architect  4
-    ## 46        Software Developer 14
-    ## 47         Software Engineer 62
-    ## 48       Software Entwickler  6
-    ## 49         Softwarearchitekt  1
-    ## 50          Softwareengineer  2
-    ## 51        Softwareentwickler  9
-    ## 52         Solution Engineer  4
-    ## 53          Storage Engineer  1
-    ## 54           System Engineer 46
-    ## 55           Systemingenieur  2
-    ## 56          Systems Engineer  8
-    ## 57             Teamlead Data  1
-    ## 58            Technical Lead  1
-    ## 59             Test Engineer  4
+    ## 1          Software Engineer 62
+    ## 2            System Engineer 46
+    ## 3         Software Developer 14
+    ## 4              Data Engineer 10
+    ## 5            DevOps Engineer 10
+    ## 6        Automation Engineer  9
+    ## 7          Security Engineer  9
+    ## 8         Softwareentwickler  9
+    ## 9              Entwickler:in  8
+    ## 10          Systems Engineer  8
+    ## 11      Application Engineer  7
+    ## 12              Data Analyst  6
+    ## 13          Network Engineer  6
+    ## 14       Software Entwickler  6
+    ## 15            Cloud Engineer  5
+    ## 16           Design Engineer  5
+    ## 17        Frontend Developer  5
+    ## 18     Requirements Engineer  5
+    ## 19         Platform Engineer  4
+    ## 20        Software Architect  4
+    ## 21         Solution Engineer  4
+    ## 22             Test Engineer  4
+    ## 23        Fullstack Engineer  3
+    ## 24             ICT-Architekt  3
+    ## 25             ICT Architekt  3
+    ## 26          Projektleiter:in  3
+    ## 27 Site Reliability Engineer  3
+    ## 28               AI Engineer  2
+    ## 29    Applikationsentwickler  2
+    ## 30         Backend Developer  2
+    ## 31            Data Scientist  2
+    ## 32         Frontend Engineer  2
+    ## 33      Full Stack Developer  2
+    ## 34      Fullstack Entwickler  2
+    ## 35                       R&D  2
+    ## 36          Senior Developer  2
+    ## 37          Softwareengineer  2
+    ## 38           Systemingenieur  2
+    ## 39         Angular Developer  1
+    ## 40          Backend Engineer  1
+    ## 41           Cloud-Architekt  1
+    ## 42           Cloud Architect  1
+    ## 43           Computer Vision  1
+    ## 44    Cybersecurity Engineer  1
+    ## 45                 Data & AI  1
+    ## 46            Data Architect  1
+    ## 47         Database Engineer  1
+    ## 48       Fullstack Developer  1
+    ## 49       IT-Security Manager  1
+    ## 50             IT Management  1
+    ## 51            Java Developer  1
+    ## 52       Middleware Engineer  1
+    ## 53         Research Engineer  1
+    ## 54       Salesforce Engineer  1
+    ## 55       Software-Entwickler  1
+    ## 56         Softwarearchitekt  1
+    ## 57          Storage Engineer  1
+    ## 58             Teamlead Data  1
+    ## 59            Technical Lead  1
     ## 60               UX Designer  1
     ## 61             Web Developer  1
 
 ``` r
 df %>%
-    count(job_category) 
+    count(job_category) %>%
+    ggplot(aes(x = n, y = job_category)) +
+    geom_bar(stat = "identity")
 ```
 
-    ##              job_category   n
-    ## 1   Cloud/System Engineer  58
-    ## 2 Consulting & Management  17
-    ## 3           Data Engineer  27
-    ## 4                  Design   6
-    ## 5          Infrastructure  33
-    ## 6       Security Engineer  16
-    ## 7       Software Engineer 149
+![](analysis_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+
+``` r
+df %>%
+    ggplot(aes(x = rating , y = job_category)) +
+    geom_boxplot(alpha = 0.7) +
+    labs(x = "Rating", y = "Job Category")
+```
+
+    ## Warning: Removed 205 rows containing non-finite values (`stat_boxplot()`).
+
+![](analysis_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+
+``` r
+df %>%
+    ggplot(aes(x = rating , y = canton)) +
+    geom_boxplot(alpha = 0.7) +
+    labs(x = "Rating", y = "Canton")
+```
+
+    ## Warning: Removed 205 rows containing non-finite values (`stat_boxplot()`).
+
+![](analysis_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+
+``` r
+df %>%
+    ggplot(aes(x = max_years, y = rating )) +
+    geom_point(alpha = 0.7) +
+    geom_smooth(method = "lm", se = FALSE, color = "blue") +
+    labs(x = "Max Years of Experience", y = " Rating", title = "Correlation between Rating and Max Years of Experience")
+```
+
+    ## `geom_smooth()` using formula = 'y ~ x'
+
+    ## Warning: Removed 205 rows containing non-finite values (`stat_smooth()`).
+
+    ## Warning: Removed 205 rows containing missing values (`geom_point()`).
+
+![](analysis_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+
+## Fit Model
+
+``` r
+# Unnest the programming_languages, tools, and frameworks columns
+df_unnested <- df %>%
+    filter(!is.na(rating))%>%
+    select(contract_type, job_title_cleaned, rating, max_years, career_stage_cleaned, workload, programming_languages, frameworks, tools, job_category) %>%
+    unnest(programming_languages) %>%
+    unnest(tools) 
+
+# One-hot encode the programming_languages column
+df_one_hot <- df_unnested %>%
+    mutate(value = 1) %>%
+    pivot_wider(names_from = programming_languages, values_from = value, values_fill = list(value = 0))
+```
+
+    ## Error in `pivot_wider()`:
+    ## ! Can't convert `fill` <double> to <list>.
+
+``` r
+# One-hot encode the tools column
+df_one_hot <- df_one_hot %>%
+    mutate(value = 1) %>%
+    pivot_wider(names_from = tools, values_from = value, values_fill = list(value = 0))
+```
+
+    ## Error in mutate(., value = 1): object 'df_one_hot' not found
+
+``` r
+# One-hot encode the frameworks column
+df_one_hot <- df_one_hot %>%
+    mutate(value = 1) %>%
+    pivot_wider(names_from = frameworks, values_from = value, values_fill = list(value = 0))
+```
+
+    ## Error in mutate(., value = 1): object 'df_one_hot' not found
+
+``` r
+glimpse(df_one_hot)
+```
+
+    ## Error in glimpse(df_one_hot): object 'df_one_hot' not found
+
+``` r
+test
+```
+
+    ## Error in eval(expr, envir, enclos): object 'test' not found
+
+``` r
+set.seed(1)
+sample <- sample(c(TRUE, FALSE), nrow(df_one_hot), replace=TRUE, prob=c(0.7,0.3))
+```
+
+    ## Error in nrow(df_one_hot): object 'df_one_hot' not found
+
+``` r
+train  <- df_one_hot[sample, ]
+```
+
+    ## Error in eval(expr, envir, enclos): object 'df_one_hot' not found
+
+``` r
+test   <- df_one_hot[!sample, ]
+```
+
+    ## Error in eval(expr, envir, enclos): object 'df_one_hot' not found
+
+``` r
+# Fit a linear regression model
+model <- lm(rating ~ ., data = train)
+```
+
+    ## Error in is.data.frame(data): object 'train' not found
+
+``` r
+# Summarize the model
+summary(model)
+```
+
+    ## Error in summary(model): object 'model' not found

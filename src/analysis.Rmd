@@ -30,8 +30,10 @@ clean_df <- raw_df %>%
         frameworks = lapply(frameworks, factor),
         tools = lapply(tools, factor),
         operating_systems = lapply(operating_systems, factor),
-        max_years = sapply(years, function(x) if (length(x) == 0) NaN else max(as.numeric(x), na.rm = TRUE))) # get min number of years, and replace nan with 0
-
+        max_years = sapply(years, function(x) if (length(x) == 0) NA else max(as.numeric(x), na.rm = TRUE)), # get min number of years, and replace nan with 0
+        programming_languages = ifelse(lengths(programming_languages) == 0, "No Programming Languages", programming_languages),
+        frameworks = ifelse(lengths(frameworks) == 0, "No Frameworks", frameworks),
+        tools = ifelse(lengths(tools) == 0, "No Tools", tools))
 colSums(is.na(clean_df))
 
 ```
@@ -148,5 +150,44 @@ df %>%
     labs(x = "Max Years of Experience", y = " Rating", title = "Correlation between Rating and Max Years of Experience")
 ```
 
+## Fit Model
 
+```{r, error=TRUE, warning=TRUE}
 
+# Unnest the programming_languages, tools, and frameworks columns
+df_unnested <- df %>%
+    filter(!is.na(rating))%>%
+    select(contract_type, job_title_cleaned, rating, max_years, career_stage_cleaned, workload, programming_languages, frameworks, tools, job_category) %>%
+    unnest(programming_languages) %>%
+    unnest(tools) 
+
+# One-hot encode the programming_languages column
+df_one_hot <- df_unnested %>%
+    mutate(value = 1) %>%
+    pivot_wider(names_from = programming_languages, values_from = value, values_fill = list(value = 0))
+
+# One-hot encode the tools column
+df_one_hot <- df_one_hot %>%
+    mutate(value = 1) %>%
+    pivot_wider(names_from = tools, values_from = value, values_fill = list(value = 0))
+
+# One-hot encode the frameworks column
+df_one_hot <- df_one_hot %>%
+    mutate(value = 1) %>%
+    pivot_wider(names_from = frameworks, values_from = value, values_fill = list(value = 0))
+
+glimpse(df_one_hot)
+```
+```{r, error=TRUE, warning=TRUE}
+
+set.seed(1)
+sample <- sample(c(TRUE, FALSE), nrow(df_one_hot), replace=TRUE, prob=c(0.7,0.3))
+train  <- df_one_hot[sample, ]
+test   <- df_one_hot[!sample, ]
+
+# Fit a linear regression model
+model <- lm(rating ~ ., data = train)
+
+# Summarize the model
+summary(model)
+```
