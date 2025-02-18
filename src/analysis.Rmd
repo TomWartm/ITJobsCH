@@ -25,6 +25,7 @@ clean_df <- raw_df %>%
     mutate(publication_date = dmy(publication_date), 
         job_title_cleaned = factor(job_title_cleaned),
         career_stage_cleaned = factor(career_stage_cleaned),
+        job_category = factor(job_category),
         canton = factor(canton),
         programming_languages = lapply(programming_languages, factor),
         frameworks = lapply(frameworks, factor),
@@ -34,7 +35,7 @@ clean_df <- raw_df %>%
         programming_languages = ifelse(lengths(programming_languages) == 0, "No Programming Languages", programming_languages),
         frameworks = ifelse(lengths(frameworks) == 0, "No Frameworks", frameworks),
         tools = ifelse(lengths(tools) == 0, "No Tools", tools))
-colSums(is.na(clean_df))
+glimpse(clean_df)
 
 ```
 
@@ -154,40 +155,35 @@ df %>%
 
 ```{r, error=TRUE, warning=TRUE}
 
-# Unnest the programming_languages, tools, and frameworks columns
-df_unnested <- df %>%
-    filter(!is.na(rating))%>%
-    select(contract_type, job_title_cleaned, rating, max_years, career_stage_cleaned, workload, programming_languages, frameworks, tools, job_category) %>%
+df_one_hot <- df %>%
+    select(url, job_category, career_stage_cleaned, programming_languages, frameworks, max_years, rating ) %>%
+    mutate(programming_languages = lapply(programming_languages, factor)) %>%
     unnest(programming_languages) %>%
-    unnest(tools) 
+    distinct() %>%
+    mutate(temp = 1) %>%
+    pivot_wider(names_from = programming_languages, values_from = temp, values_fill = list(temp = 0))%>%
+    unnest(frameworks) %>%
+    distinct() %>%
+    mutate(temp = 1) %>%
+    pivot_wider(names_from = frameworks, values_from = temp, values_fill = list(temp = 0))
 
-# One-hot encode the programming_languages column
-df_one_hot <- df_unnested %>%
-    mutate(value = 1) %>%
-    pivot_wider(names_from = programming_languages, values_from = value, values_fill = list(value = 0))
-
-# One-hot encode the tools column
-df_one_hot <- df_one_hot %>%
-    mutate(value = 1) %>%
-    pivot_wider(names_from = tools, values_from = value, values_fill = list(value = 0))
-
-# One-hot encode the frameworks column
-df_one_hot <- df_one_hot %>%
-    mutate(value = 1) %>%
-    pivot_wider(names_from = frameworks, values_from = value, values_fill = list(value = 0))
+    
 
 glimpse(df_one_hot)
 ```
-```{r, error=TRUE, warning=TRUE}
 
+
+```{r, error=TRUE, warning=TRUE}
+df_model <- df_one_hot %>% filter(!is.na(rating))
+df_to_predict <- df_one_hot %>% filter(is.na(rating))
 set.seed(1)
-sample <- sample(c(TRUE, FALSE), nrow(df_one_hot), replace=TRUE, prob=c(0.7,0.3))
-train  <- df_one_hot[sample, ]
-test   <- df_one_hot[!sample, ]
+sample <- sample(c(TRUE, FALSE), nrow(df_model), replace=TRUE, prob=c(0.8,0.2))
+train  <- df_model[sample, ]
+test   <- df_model[!sample, ]
 
 # Fit a linear regression model
-model <- lm(rating ~ ., data = train)
+model <- lm(rating ~ . - url, data = train)
 
-# Summarize the model
+
 summary(model)
 ```

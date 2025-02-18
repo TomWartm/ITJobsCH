@@ -646,34 +646,45 @@ qualifications.</p>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">publication_date =</span> <span class="fu">dmy</span>(publication_date), </span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">job_title_cleaned =</span> <span class="fu">factor</span>(job_title_cleaned),</span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        <span class="at">career_stage_cleaned =</span> <span class="fu">factor</span>(career_stage_cleaned),</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        <span class="at">canton =</span> <span class="fu">factor</span>(canton),</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        <span class="at">programming_languages =</span> <span class="fu">lapply</span>(programming_languages, factor),</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        <span class="at">frameworks =</span> <span class="fu">lapply</span>(frameworks, factor),</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">tools =</span> <span class="fu">lapply</span>(tools, factor),</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        <span class="at">operating_systems =</span> <span class="fu">lapply</span>(operating_systems, factor),</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">max_years =</span> <span class="fu">sapply</span>(years, <span class="cf">function</span>(x) <span class="cf">if</span> (<span class="fu">length</span>(x) <span class="sc">==</span> <span class="dv">0</span>) <span class="cn">NA</span> <span class="cf">else</span> <span class="fu">max</span>(<span class="fu">as.numeric</span>(x), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)), <span class="co"># get min number of years, and replace nan with 0</span></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">programming_languages =</span> <span class="fu">ifelse</span>(<span class="fu">lengths</span>(programming_languages) <span class="sc">==</span> <span class="dv">0</span>, <span class="st">&quot;No Programming Languages&quot;</span>, programming_languages),</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        <span class="at">frameworks =</span> <span class="fu">ifelse</span>(<span class="fu">lengths</span>(frameworks) <span class="sc">==</span> <span class="dv">0</span>, <span class="st">&quot;No Frameworks&quot;</span>, frameworks),</span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        <span class="at">tools =</span> <span class="fu">ifelse</span>(<span class="fu">lengths</span>(tools) <span class="sc">==</span> <span class="dv">0</span>, <span class="st">&quot;No Tools&quot;</span>, tools))</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="fu">colSums</span>(<span class="fu">is.na</span>(clean_df))</span></code></pre></div>
-<pre><code>##               company         contract_type          descriptions 
-##                   923                  2669                     0 
-##            downloaded             job_title              language 
-##                     0                     0                  2913 
-##         place_of_work      publication_date                rating 
-##                  2077                  2084                  3463 
-##              reviewed                salary          search_query 
-##                  3463                  3815                     0 
-##                   url               website              workload 
-##                     0                  2525                  2642 
-##  career_stage_cleaned                canton programming_languages 
-##                  3266                  3131                     0 
-##            frameworks                 tools     operating_systems 
-##                     0                     0                     0 
-##                 years             education     job_title_cleaned 
-##                     0                     0                  2331 
-##          job_category             max_years 
-##                  2331                  3294</code></pre>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        <span class="at">job_category =</span> <span class="fu">factor</span>(job_category),</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        <span class="at">canton =</span> <span class="fu">factor</span>(canton),</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        <span class="at">programming_languages =</span> <span class="fu">lapply</span>(programming_languages, factor),</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">frameworks =</span> <span class="fu">lapply</span>(frameworks, factor),</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        <span class="at">tools =</span> <span class="fu">lapply</span>(tools, factor),</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">operating_systems =</span> <span class="fu">lapply</span>(operating_systems, factor),</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">max_years =</span> <span class="fu">sapply</span>(years, <span class="cf">function</span>(x) <span class="cf">if</span> (<span class="fu">length</span>(x) <span class="sc">==</span> <span class="dv">0</span>) <span class="cn">NA</span> <span class="cf">else</span> <span class="fu">max</span>(<span class="fu">as.numeric</span>(x), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)), <span class="co"># get min number of years, and replace nan with 0</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        <span class="at">programming_languages =</span> <span class="fu">ifelse</span>(<span class="fu">lengths</span>(programming_languages) <span class="sc">==</span> <span class="dv">0</span>, <span class="st">&quot;No Programming Languages&quot;</span>, programming_languages),</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        <span class="at">frameworks =</span> <span class="fu">ifelse</span>(<span class="fu">lengths</span>(frameworks) <span class="sc">==</span> <span class="dv">0</span>, <span class="st">&quot;No Frameworks&quot;</span>, frameworks),</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        <span class="at">tools =</span> <span class="fu">ifelse</span>(<span class="fu">lengths</span>(tools) <span class="sc">==</span> <span class="dv">0</span>, <span class="st">&quot;No Tools&quot;</span>, tools))</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(clean_df)</span></code></pre></div>
+<pre><code>## Rows: 3,936
+## Columns: 26
+## $ company               &lt;chr&gt; NA, &quot;BBT Software AG&quot;, &quot;VAT Vakuumventile AG&quot;, &quot;~
+## $ contract_type         &lt;chr&gt; NA, NA, NA, &quot;Unlimited employment&quot;, NA, NA, NA, ~
+## $ descriptions          &lt;list&gt; [&lt;data.frame[0 x 0]&gt;], [&lt;data.frame[1 x 1]&gt;], [~
+## $ downloaded            &lt;lgl&gt; TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, ~
+## $ job_title             &lt;chr&gt; &quot;Bauingenieur*in (60-100%) Bereich Konstruktiver~
+## $ language              &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, &quot;German (Interme~
+## $ place_of_work         &lt;chr&gt; NA, &quot;Root D4&quot;, NA, &quot;Ringstrasse 39, 4106 Therwil~
+## $ publication_date      &lt;date&gt; NA, 2025-02-06, NA, 2025-02-07, NA, NA, NA, NA,~
+## $ rating                &lt;dbl&gt; NA, 2, NA, 6, NA, NA, NA, NA, NA, NA, NA, 4, NA,~
+## $ reviewed              &lt;dbl&gt; NA, 1, NA, 1, NA, NA, NA, NA, NA, NA, NA, 1, NA,~
+## $ salary                &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ~
+## $ search_query          &lt;chr&gt; &quot;data engineer&quot;, &quot;all jobs&quot;, &quot;software engineer&quot;~
+## $ url                   &lt;chr&gt; &quot;https://www.jobs.ch/en/vacancies/detail/221d09c~
+## $ website               &lt;chr&gt; NA, &quot;ITJobs&quot;, &quot;Jobs&quot;, NA, NA, NA, NA, NA, NA, &quot;I~
+## $ workload              &lt;chr&gt; NA, NA, NA, &quot;100%&quot;, NA, NA, NA, NA, &quot;80 – 100%&quot;,~
+## $ career_stage_cleaned  &lt;fct&gt; NA, NA, NA, NA, NA, NA, NA, senior, NA, NA, NA, ~
+## $ canton                &lt;fct&gt; NA, NA, NA, NA, NA, NA, NA, NA, Zürich, Schwyz, ~
+## $ programming_languages &lt;list&gt; &quot;No Programming Languages&quot;, &quot;No Programming Lan~
+## $ frameworks            &lt;list&gt; &quot;No Frameworks&quot;, &quot;No Frameworks&quot;, &quot;No Framework~
+## $ tools                 &lt;list&gt; &quot;No Tools&quot;, &quot;No Tools&quot;, &quot;No Tools&quot;, &quot;No Tools&quot;,~
+## $ operating_systems     &lt;list&gt; &lt;&gt;, &lt;&gt;, &lt;&gt;, &lt;&gt;, &lt;&gt;, &lt;&gt;, &lt;&gt;, &lt;&gt;, &lt;&gt;, &lt;&gt;, &lt;&gt;, &lt;&gt;,~
+## $ years                 &lt;list&gt; &lt;&gt;, &lt;&gt;, &lt;&gt;, &lt;&gt;, &lt;&gt;, &lt;&gt;, &lt;&gt;, &lt;&gt;, 5, &lt;&gt;, &lt;&gt;, &lt;&gt;, ~
+## $ education             &lt;list&gt; &lt;&gt;, &lt;&gt;, &lt;&gt;, &quot;PhD&quot;, &lt;&gt;, &lt;&gt;, &lt;&gt;, &lt;&gt;, &quot;Vocational&quot;~
+## $ job_title_cleaned     &lt;fct&gt; NA, System Engineer, NA, Research Engineer, NA, ~
+## $ job_category          &lt;fct&gt; NA, Cloud/System Engineer, NA, Software Engineer~
+## $ max_years             &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA, 5, NA, NA, NA, N~</code></pre>
 <p>Check if some IT key words in listing title were missed during
 preprocessing, and therefore have a NaN value in the
 <code>job_title_cleaned</code> attribute.</p>
@@ -735,7 +746,7 @@ preprocessing, and therefore have a NaN value in the
 ## $ years                 &lt;list&gt; 5, 2, 4, 3, 5, 3, &lt;3, 5&gt;, 2, 3, 2, &lt;3, 5&gt;, 5, 3~
 ## $ education             &lt;list&gt; &quot;Vocational&quot;, &lt;&gt;, &quot;Vocational&quot;, &lt;&gt;, &lt;&gt;, &quot;PhD&quot;, ~
 ## $ job_title_cleaned     &lt;fct&gt; Applikationsentwickler, Automation Engineer, Sys~
-## $ job_category          &lt;chr&gt; &quot;Software Engineer&quot;, &quot;Software Engineer&quot;, &quot;Cloud~
+## $ job_category          &lt;fct&gt; Software Engineer, Software Engineer, Cloud/Syst~
 ## $ max_years             &lt;dbl&gt; 5, 2, 4, 3, 5, 3, 5, 2, 3, 2, 5, 5, 3, 5, 3, 2, ~</code></pre>
 <h2 id="visualize">Visualize</h2>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>df <span class="sc">%&gt;%</span></span>
@@ -884,46 +895,170 @@ preprocessing, and therefore have a NaN value in the
 ## Warning: Removed 205 rows containing missing values (`geom_point()`).</code></pre>
 <p><img src="data:image/png;base64,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" /><!-- --></p>
 <h2 id="fit-model">Fit Model</h2>
-<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Unnest the programming_languages, tools, and frameworks columns</span></span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>df_unnested <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span></span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(rating))<span class="sc">%&gt;%</span></span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(contract_type, job_title_cleaned, rating, max_years, career_stage_cleaned, workload, programming_languages, frameworks, tools, job_category) <span class="sc">%&gt;%</span></span>
-<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unnest</span>(programming_languages) <span class="sc">%&gt;%</span></span>
-<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unnest</span>(tools) </span>
-<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a><span class="co"># One-hot encode the programming_languages column</span></span>
-<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>df_one_hot <span class="ot">&lt;-</span> df_unnested <span class="sc">%&gt;%</span></span>
-<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">value =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> programming_languages, <span class="at">values_from =</span> value, <span class="at">values_fill =</span> <span class="fu">list</span>(<span class="at">value =</span> <span class="dv">0</span>))</span></code></pre></div>
-<pre><code>## Error in `pivot_wider()`:
-## ! Can&#39;t convert `fill` &lt;double&gt; to &lt;list&gt;.</code></pre>
-<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># One-hot encode the tools column</span></span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>df_one_hot <span class="ot">&lt;-</span> df_one_hot <span class="sc">%&gt;%</span></span>
-<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">value =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> tools, <span class="at">values_from =</span> value, <span class="at">values_fill =</span> <span class="fu">list</span>(<span class="at">value =</span> <span class="dv">0</span>))</span></code></pre></div>
-<pre><code>## Error in mutate(., value = 1): object &#39;df_one_hot&#39; not found</code></pre>
-<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># One-hot encode the frameworks column</span></span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>df_one_hot <span class="ot">&lt;-</span> df_one_hot <span class="sc">%&gt;%</span></span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">value =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> frameworks, <span class="at">values_from =</span> value, <span class="at">values_fill =</span> <span class="fu">list</span>(<span class="at">value =</span> <span class="dv">0</span>))</span></code></pre></div>
-<pre><code>## Error in mutate(., value = 1): object &#39;df_one_hot&#39; not found</code></pre>
-<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(df_one_hot)</span></code></pre></div>
-<pre><code>## Error in glimpse(df_one_hot): object &#39;df_one_hot&#39; not found</code></pre>
-<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>test</span></code></pre></div>
-<pre><code>## Error in eval(expr, envir, enclos): object &#39;test&#39; not found</code></pre>
-<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>sample <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">FALSE</span>), <span class="fu">nrow</span>(df_one_hot), <span class="at">replace=</span><span class="cn">TRUE</span>, <span class="at">prob=</span><span class="fu">c</span>(<span class="fl">0.7</span>,<span class="fl">0.3</span>))</span></code></pre></div>
-<pre><code>## Error in nrow(df_one_hot): object &#39;df_one_hot&#39; not found</code></pre>
-<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>train  <span class="ot">&lt;-</span> df_one_hot[sample, ]</span></code></pre></div>
-<pre><code>## Error in eval(expr, envir, enclos): object &#39;df_one_hot&#39; not found</code></pre>
-<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>test   <span class="ot">&lt;-</span> df_one_hot[<span class="sc">!</span>sample, ]</span></code></pre></div>
-<pre><code>## Error in eval(expr, envir, enclos): object &#39;df_one_hot&#39; not found</code></pre>
-<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit a linear regression model</span></span>
-<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">lm</span>(rating <span class="sc">~</span> ., <span class="at">data =</span> train)</span></code></pre></div>
-<pre><code>## Error in is.data.frame(data): object &#39;train&#39; not found</code></pre>
-<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Summarize the model</span></span>
-<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model)</span></code></pre></div>
-<pre><code>## Error in summary(model): object &#39;model&#39; not found</code></pre>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>df_one_hot <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(url, job_category, career_stage_cleaned, programming_languages, frameworks, max_years, rating ) <span class="sc">%&gt;%</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">programming_languages =</span> <span class="fu">lapply</span>(programming_languages, factor)) <span class="sc">%&gt;%</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unnest</span>(programming_languages) <span class="sc">%&gt;%</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">distinct</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">temp =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> programming_languages, <span class="at">values_from =</span> temp, <span class="at">values_fill =</span> <span class="fu">list</span>(<span class="at">temp =</span> <span class="dv">0</span>))<span class="sc">%&gt;%</span></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unnest</span>(frameworks) <span class="sc">%&gt;%</span></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">distinct</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">temp =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> frameworks, <span class="at">values_from =</span> temp, <span class="at">values_fill =</span> <span class="fu">list</span>(<span class="at">temp =</span> <span class="dv">0</span>))</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(df_one_hot)</span></code></pre></div>
+<pre><code>## Rows: 306
+## Columns: 43
+## $ url                        &lt;chr&gt; &quot;https://www.jobs.ch/en/vacancies/detail/23~
+## $ job_category               &lt;fct&gt; Software Engineer, Software Engineer, Cloud~
+## $ career_stage_cleaned       &lt;fct&gt; NA, NA, NA, NA, NA, NA, senior, NA, NA, NA,~
+## $ max_years                  &lt;dbl&gt; 5, 2, 4, 3, 5, 3, 5, 2, 3, 2, 5, 5, 3, 5, 3~
+## $ rating                     &lt;dbl&gt; NA, NA, NA, NA, 7, NA, 2, NA, NA, NA, 4, NA~
+## $ Java                       &lt;dbl&gt; 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1~
+## $ SQL                        &lt;dbl&gt; 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1~
+## $ C                          &lt;dbl&gt; 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ `C++`                      &lt;dbl&gt; 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0~
+## $ `No Programming Languages` &lt;dbl&gt; 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0~
+## $ `C#`                       &lt;dbl&gt; 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0~
+## $ Python                     &lt;dbl&gt; 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0~
+## $ MATLAB                     &lt;dbl&gt; 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ Shell                      &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ Lua                        &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0~
+## $ CSS                        &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0~
+## $ HTML                       &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1~
+## $ TypeScript                 &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1~
+## $ JavaScript                 &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1~
+## $ Bash                       &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ Go                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ PowerShell                 &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ Kotlin                     &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ PHP                        &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ Dart                       &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ Perl                       &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ Rust                       &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ Swift                      &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ Angular                    &lt;dbl&gt; 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1~
+## $ Spring                     &lt;dbl&gt; 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1~
+## $ `No Frameworks`            &lt;dbl&gt; 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0~
+## $ React                      &lt;dbl&gt; 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1~
+## $ Next.js                    &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0~
+## $ Vue                        &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1~
+## $ .NET                       &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ ASP.NET                    &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ Node.js                    &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ NestJS                     &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ Svelte                     &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ Django                     &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ FastAPI                    &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ Symfony                    &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ Laravel                    &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~</code></pre>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>df_model <span class="ot">&lt;-</span> df_one_hot <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(rating))</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>df_to_predict <span class="ot">&lt;-</span> df_one_hot <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="fu">is.na</span>(rating))</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>sample <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">FALSE</span>), <span class="fu">nrow</span>(df_model), <span class="at">replace=</span><span class="cn">TRUE</span>, <span class="at">prob=</span><span class="fu">c</span>(<span class="fl">0.8</span>,<span class="fl">0.2</span>))</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>train  <span class="ot">&lt;-</span> df_model[sample, ]</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>test   <span class="ot">&lt;-</span> df_model[<span class="sc">!</span>sample, ]</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit a linear regression model</span></span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">lm</span>(rating <span class="sc">~</span> . <span class="sc">-</span> url, <span class="at">data =</span> train)</span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = rating ~ . - url, data = train)
+## 
+## Residuals:
+##          2          4         11         14         16         17         34 
+## -2.671e-16  1.328e-15 -1.468e-15  1.500e+00  8.149e-16  1.301e-15 -5.000e-01 
+##         35         44         46         48         49         54         57 
+## -4.480e-16  1.000e+00 -1.149e-16  1.071e-16  3.014e-16  1.217e-15 -1.225e-15 
+##         58         59         63         65         72         80 
+## -3.647e-16 -1.500e+00 -2.537e-16 -1.000e+00  5.000e-01 -1.337e-15 
+## 
+## Coefficients: (31 not defined because of singularities)
+##                                     Estimate Std. Error t value Pr(&gt;|t|)  
+## (Intercept)                           2.1000     2.6510   0.792   0.4642  
+## job_categoryConsulting &amp; Management  -0.9000     1.3594  -0.662   0.5372  
+## job_categoryData Engineer             4.4000     1.5962   2.756   0.0400 *
+## job_categoryDesign                   -2.0000     1.4491  -1.380   0.2261  
+## job_categoryInfrastructure            3.4000     2.6510   1.283   0.2559  
+## job_categorySoftware Engineer         2.4000     3.3299   0.721   0.5033  
+## career_stage_cleanedsenior           -4.5000     2.0494  -2.196   0.0795 .
+## max_years                             0.2000     0.3347   0.598   0.5761  
+## Java                                  2.0000     2.5100   0.797   0.4617  
+## SQL                                   1.0000     1.6733   0.598   0.5761  
+## C                                     3.8000     4.5024   0.844   0.4372  
+## `C++`                                -1.2000     1.4873  -0.807   0.4564  
+## `No Programming Languages`            3.4000     2.2199   1.532   0.1862  
+## `C#`                                      NA         NA      NA       NA  
+## Python                                    NA         NA      NA       NA  
+## MATLAB                                    NA         NA      NA       NA  
+## Shell                                     NA         NA      NA       NA  
+## Lua                                       NA         NA      NA       NA  
+## CSS                                   2.4000     3.4334   0.699   0.5157  
+## HTML                                      NA         NA      NA       NA  
+## TypeScript                                NA         NA      NA       NA  
+## JavaScript                                NA         NA      NA       NA  
+## Bash                                      NA         NA      NA       NA  
+## Go                                        NA         NA      NA       NA  
+## PowerShell                                NA         NA      NA       NA  
+## Kotlin                                    NA         NA      NA       NA  
+## PHP                                       NA         NA      NA       NA  
+## Dart                                      NA         NA      NA       NA  
+## Perl                                      NA         NA      NA       NA  
+## Rust                                      NA         NA      NA       NA  
+## Swift                                     NA         NA      NA       NA  
+## Angular                               1.6000     1.9514   0.820   0.4496  
+## Spring                                    NA         NA      NA       NA  
+## `No Frameworks`                           NA         NA      NA       NA  
+## React                                     NA         NA      NA       NA  
+## Next.js                                   NA         NA      NA       NA  
+## Vue                                       NA         NA      NA       NA  
+## .NET                                      NA         NA      NA       NA  
+## ASP.NET                                   NA         NA      NA       NA  
+## Node.js                                   NA         NA      NA       NA  
+## NestJS                                    NA         NA      NA       NA  
+## Svelte                                    NA         NA      NA       NA  
+## Django                                    NA         NA      NA       NA  
+## FastAPI                                   NA         NA      NA       NA  
+## Symfony                                   NA         NA      NA       NA  
+## Laravel                                   NA         NA      NA       NA  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 1.183 on 5 degrees of freedom
+##   (64 observations deleted due to missingness)
+## Multiple R-squared:  0.8955, Adjusted R-squared:  0.603 
+## F-statistic: 3.061 on 14 and 5 DF,  p-value: 0.1114</code></pre>
+<h2 id="predict">Predict</h2>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>df_to_predict_no_url <span class="ot">&lt;-</span> df_to_predict <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span>url)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Align factor levels with training data</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (col <span class="cf">in</span> <span class="fu">names</span>(df_to_predict_no_url)) {</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.factor</span>(df_to_predict_no_url[[col]])) {</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>    df_to_predict_no_url[[col]] <span class="ot">&lt;-</span> <span class="fu">factor</span>(df_to_predict_no_url[[col]], <span class="at">levels =</span> <span class="fu">levels</span>(<span class="fu">droplevels</span>(train[[col]])))</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Make predictions </span></span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>predictions <span class="ot">&lt;-</span> <span class="fu">predict</span>(model, <span class="at">newdata =</span> df_to_predict_no_url)</span></code></pre></div>
+<pre><code>## Error in model.frame.default(Terms, newdata, na.action = na.action, xlev = object$xlevels): object is not a matrix</code></pre>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>df_to_predict<span class="sc">$</span>predicted_rating <span class="ot">&lt;-</span> predictions</span></code></pre></div>
+<pre><code>## Error in eval(expr, envir, enclos): object &#39;predictions&#39; not found</code></pre>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>highest_predicted_ratings <span class="ot">&lt;-</span> df_to_predict <span class="sc">%&gt;%</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(<span class="fu">desc</span>(predicted_rating))<span class="sc">%&gt;%</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(url, predicted_rating) <span class="sc">%&gt;%</span></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>)  </span></code></pre></div>
+<pre><code>## Error in `arrange()`:
+## i In argument: `..1 = predicted_rating`.
+## Caused by error:
+## ! object &#39;predicted_rating&#39; not found</code></pre>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>highest_predicted_ratings</span></code></pre></div>
+<pre><code>## Error in eval(expr, envir, enclos): object &#39;highest_predicted_ratings&#39; not found</code></pre>
 
 </body>
 </html>

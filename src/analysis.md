@@ -55,6 +55,7 @@ clean_df <- raw_df %>%
     mutate(publication_date = dmy(publication_date), 
         job_title_cleaned = factor(job_title_cleaned),
         career_stage_cleaned = factor(career_stage_cleaned),
+        job_category = factor(job_category),
         canton = factor(canton),
         programming_languages = lapply(programming_languages, factor),
         frameworks = lapply(frameworks, factor),
@@ -64,27 +65,37 @@ clean_df <- raw_df %>%
         programming_languages = ifelse(lengths(programming_languages) == 0, "No Programming Languages", programming_languages),
         frameworks = ifelse(lengths(frameworks) == 0, "No Frameworks", frameworks),
         tools = ifelse(lengths(tools) == 0, "No Tools", tools))
-colSums(is.na(clean_df))
+glimpse(clean_df)
 ```
 
-    ##               company         contract_type          descriptions 
-    ##                   923                  2669                     0 
-    ##            downloaded             job_title              language 
-    ##                     0                     0                  2913 
-    ##         place_of_work      publication_date                rating 
-    ##                  2077                  2084                  3463 
-    ##              reviewed                salary          search_query 
-    ##                  3463                  3815                     0 
-    ##                   url               website              workload 
-    ##                     0                  2525                  2642 
-    ##  career_stage_cleaned                canton programming_languages 
-    ##                  3266                  3131                     0 
-    ##            frameworks                 tools     operating_systems 
-    ##                     0                     0                     0 
-    ##                 years             education     job_title_cleaned 
-    ##                     0                     0                  2331 
-    ##          job_category             max_years 
-    ##                  2331                  3294
+    ## Rows: 3,936
+    ## Columns: 26
+    ## $ company               <chr> NA, "BBT Software AG", "VAT Vakuumventile AG", "~
+    ## $ contract_type         <chr> NA, NA, NA, "Unlimited employment", NA, NA, NA, ~
+    ## $ descriptions          <list> [<data.frame[0 x 0]>], [<data.frame[1 x 1]>], [~
+    ## $ downloaded            <lgl> TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, ~
+    ## $ job_title             <chr> "Bauingenieur*in (60-100%) Bereich Konstruktiver~
+    ## $ language              <chr> NA, NA, NA, NA, NA, NA, NA, NA, "German (Interme~
+    ## $ place_of_work         <chr> NA, "Root D4", NA, "Ringstrasse 39, 4106 Therwil~
+    ## $ publication_date      <date> NA, 2025-02-06, NA, 2025-02-07, NA, NA, NA, NA,~
+    ## $ rating                <dbl> NA, 2, NA, 6, NA, NA, NA, NA, NA, NA, NA, 4, NA,~
+    ## $ reviewed              <dbl> NA, 1, NA, 1, NA, NA, NA, NA, NA, NA, NA, 1, NA,~
+    ## $ salary                <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ~
+    ## $ search_query          <chr> "data engineer", "all jobs", "software engineer"~
+    ## $ url                   <chr> "https://www.jobs.ch/en/vacancies/detail/221d09c~
+    ## $ website               <chr> NA, "ITJobs", "Jobs", NA, NA, NA, NA, NA, NA, "I~
+    ## $ workload              <chr> NA, NA, NA, "100%", NA, NA, NA, NA, "80 – 100%",~
+    ## $ career_stage_cleaned  <fct> NA, NA, NA, NA, NA, NA, NA, senior, NA, NA, NA, ~
+    ## $ canton                <fct> NA, NA, NA, NA, NA, NA, NA, NA, Zürich, Schwyz, ~
+    ## $ programming_languages <list> "No Programming Languages", "No Programming Lan~
+    ## $ frameworks            <list> "No Frameworks", "No Frameworks", "No Framework~
+    ## $ tools                 <list> "No Tools", "No Tools", "No Tools", "No Tools",~
+    ## $ operating_systems     <list> <>, <>, <>, <>, <>, <>, <>, <>, <>, <>, <>, <>,~
+    ## $ years                 <list> <>, <>, <>, <>, <>, <>, <>, <>, 5, <>, <>, <>, ~
+    ## $ education             <list> <>, <>, <>, "PhD", <>, <>, <>, <>, "Vocational"~
+    ## $ job_title_cleaned     <fct> NA, System Engineer, NA, Research Engineer, NA, ~
+    ## $ job_category          <fct> NA, Cloud/System Engineer, NA, Software Engineer~
+    ## $ max_years             <dbl> NA, NA, NA, NA, NA, NA, NA, NA, 5, NA, NA, NA, N~
 
 Check if some IT key words in listing title were missed during
 preprocessing, and therefore have a NaN value in the `job_title_cleaned`
@@ -155,7 +166,7 @@ glimpse(df)
     ## $ years                 <list> 5, 2, 4, 3, 5, 3, <3, 5>, 2, 3, 2, <3, 5>, 5, 3~
     ## $ education             <list> "Vocational", <>, "Vocational", <>, <>, "PhD", ~
     ## $ job_title_cleaned     <fct> Applikationsentwickler, Automation Engineer, Sys~
-    ## $ job_category          <chr> "Software Engineer", "Software Engineer", "Cloud~
+    ## $ job_category          <fct> Software Engineer, Software Engineer, Cloud/Syst~
     ## $ max_years             <dbl> 5, 2, 4, 3, 5, 3, 5, 2, 3, 2, 5, 5, 3, 5, 3, 2, ~
 
 ## Visualize
@@ -361,81 +372,190 @@ df %>%
 ## Fit Model
 
 ``` r
-# Unnest the programming_languages, tools, and frameworks columns
-df_unnested <- df %>%
-    filter(!is.na(rating))%>%
-    select(contract_type, job_title_cleaned, rating, max_years, career_stage_cleaned, workload, programming_languages, frameworks, tools, job_category) %>%
+df_one_hot <- df %>%
+    select(url, job_category, career_stage_cleaned, programming_languages, frameworks, max_years, rating ) %>%
+    mutate(programming_languages = lapply(programming_languages, factor)) %>%
     unnest(programming_languages) %>%
-    unnest(tools) 
+    distinct() %>%
+    mutate(temp = 1) %>%
+    pivot_wider(names_from = programming_languages, values_from = temp, values_fill = list(temp = 0))%>%
+    unnest(frameworks) %>%
+    distinct() %>%
+    mutate(temp = 1) %>%
+    pivot_wider(names_from = frameworks, values_from = temp, values_fill = list(temp = 0))
 
-# One-hot encode the programming_languages column
-df_one_hot <- df_unnested %>%
-    mutate(value = 1) %>%
-    pivot_wider(names_from = programming_languages, values_from = value, values_fill = list(value = 0))
-```
+    
 
-    ## Error in `pivot_wider()`:
-    ## ! Can't convert `fill` <double> to <list>.
-
-``` r
-# One-hot encode the tools column
-df_one_hot <- df_one_hot %>%
-    mutate(value = 1) %>%
-    pivot_wider(names_from = tools, values_from = value, values_fill = list(value = 0))
-```
-
-    ## Error in mutate(., value = 1): object 'df_one_hot' not found
-
-``` r
-# One-hot encode the frameworks column
-df_one_hot <- df_one_hot %>%
-    mutate(value = 1) %>%
-    pivot_wider(names_from = frameworks, values_from = value, values_fill = list(value = 0))
-```
-
-    ## Error in mutate(., value = 1): object 'df_one_hot' not found
-
-``` r
 glimpse(df_one_hot)
 ```
 
-    ## Error in glimpse(df_one_hot): object 'df_one_hot' not found
+    ## Rows: 306
+    ## Columns: 43
+    ## $ url                        <chr> "https://www.jobs.ch/en/vacancies/detail/23~
+    ## $ job_category               <fct> Software Engineer, Software Engineer, Cloud~
+    ## $ career_stage_cleaned       <fct> NA, NA, NA, NA, NA, NA, senior, NA, NA, NA,~
+    ## $ max_years                  <dbl> 5, 2, 4, 3, 5, 3, 5, 2, 3, 2, 5, 5, 3, 5, 3~
+    ## $ rating                     <dbl> NA, NA, NA, NA, 7, NA, 2, NA, NA, NA, 4, NA~
+    ## $ Java                       <dbl> 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1~
+    ## $ SQL                        <dbl> 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1~
+    ## $ C                          <dbl> 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ `C++`                      <dbl> 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0~
+    ## $ `No Programming Languages` <dbl> 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0~
+    ## $ `C#`                       <dbl> 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0~
+    ## $ Python                     <dbl> 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0~
+    ## $ MATLAB                     <dbl> 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ Shell                      <dbl> 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ Lua                        <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0~
+    ## $ CSS                        <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0~
+    ## $ HTML                       <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1~
+    ## $ TypeScript                 <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1~
+    ## $ JavaScript                 <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1~
+    ## $ Bash                       <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ Go                         <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ PowerShell                 <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ Kotlin                     <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ PHP                        <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ Dart                       <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ Perl                       <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ Rust                       <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ Swift                      <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ Angular                    <dbl> 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1~
+    ## $ Spring                     <dbl> 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1~
+    ## $ `No Frameworks`            <dbl> 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0~
+    ## $ React                      <dbl> 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1~
+    ## $ Next.js                    <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0~
+    ## $ Vue                        <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1~
+    ## $ .NET                       <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ ASP.NET                    <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ Node.js                    <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ NestJS                     <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ Svelte                     <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ Django                     <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ FastAPI                    <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ Symfony                    <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ Laravel                    <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
 
 ``` r
-test
-```
-
-    ## Error in eval(expr, envir, enclos): object 'test' not found
-
-``` r
+df_model <- df_one_hot %>% filter(!is.na(rating))
+df_to_predict <- df_one_hot %>% filter(is.na(rating))
 set.seed(1)
-sample <- sample(c(TRUE, FALSE), nrow(df_one_hot), replace=TRUE, prob=c(0.7,0.3))
-```
+sample <- sample(c(TRUE, FALSE), nrow(df_model), replace=TRUE, prob=c(0.8,0.2))
+train  <- df_model[sample, ]
+test   <- df_model[!sample, ]
 
-    ## Error in nrow(df_one_hot): object 'df_one_hot' not found
-
-``` r
-train  <- df_one_hot[sample, ]
-```
-
-    ## Error in eval(expr, envir, enclos): object 'df_one_hot' not found
-
-``` r
-test   <- df_one_hot[!sample, ]
-```
-
-    ## Error in eval(expr, envir, enclos): object 'df_one_hot' not found
-
-``` r
 # Fit a linear regression model
-model <- lm(rating ~ ., data = train)
-```
+model <- lm(rating ~ . - url, data = train)
 
-    ## Error in is.data.frame(data): object 'train' not found
 
-``` r
-# Summarize the model
 summary(model)
 ```
 
-    ## Error in summary(model): object 'model' not found
+    ## 
+    ## Call:
+    ## lm(formula = rating ~ . - url, data = train)
+    ## 
+    ## Residuals:
+    ##          2          4         11         14         16         17         34 
+    ## -2.671e-16  1.328e-15 -1.468e-15  1.500e+00  8.149e-16  1.301e-15 -5.000e-01 
+    ##         35         44         46         48         49         54         57 
+    ## -4.480e-16  1.000e+00 -1.149e-16  1.071e-16  3.014e-16  1.217e-15 -1.225e-15 
+    ##         58         59         63         65         72         80 
+    ## -3.647e-16 -1.500e+00 -2.537e-16 -1.000e+00  5.000e-01 -1.337e-15 
+    ## 
+    ## Coefficients: (31 not defined because of singularities)
+    ##                                     Estimate Std. Error t value Pr(>|t|)  
+    ## (Intercept)                           2.1000     2.6510   0.792   0.4642  
+    ## job_categoryConsulting & Management  -0.9000     1.3594  -0.662   0.5372  
+    ## job_categoryData Engineer             4.4000     1.5962   2.756   0.0400 *
+    ## job_categoryDesign                   -2.0000     1.4491  -1.380   0.2261  
+    ## job_categoryInfrastructure            3.4000     2.6510   1.283   0.2559  
+    ## job_categorySoftware Engineer         2.4000     3.3299   0.721   0.5033  
+    ## career_stage_cleanedsenior           -4.5000     2.0494  -2.196   0.0795 .
+    ## max_years                             0.2000     0.3347   0.598   0.5761  
+    ## Java                                  2.0000     2.5100   0.797   0.4617  
+    ## SQL                                   1.0000     1.6733   0.598   0.5761  
+    ## C                                     3.8000     4.5024   0.844   0.4372  
+    ## `C++`                                -1.2000     1.4873  -0.807   0.4564  
+    ## `No Programming Languages`            3.4000     2.2199   1.532   0.1862  
+    ## `C#`                                      NA         NA      NA       NA  
+    ## Python                                    NA         NA      NA       NA  
+    ## MATLAB                                    NA         NA      NA       NA  
+    ## Shell                                     NA         NA      NA       NA  
+    ## Lua                                       NA         NA      NA       NA  
+    ## CSS                                   2.4000     3.4334   0.699   0.5157  
+    ## HTML                                      NA         NA      NA       NA  
+    ## TypeScript                                NA         NA      NA       NA  
+    ## JavaScript                                NA         NA      NA       NA  
+    ## Bash                                      NA         NA      NA       NA  
+    ## Go                                        NA         NA      NA       NA  
+    ## PowerShell                                NA         NA      NA       NA  
+    ## Kotlin                                    NA         NA      NA       NA  
+    ## PHP                                       NA         NA      NA       NA  
+    ## Dart                                      NA         NA      NA       NA  
+    ## Perl                                      NA         NA      NA       NA  
+    ## Rust                                      NA         NA      NA       NA  
+    ## Swift                                     NA         NA      NA       NA  
+    ## Angular                               1.6000     1.9514   0.820   0.4496  
+    ## Spring                                    NA         NA      NA       NA  
+    ## `No Frameworks`                           NA         NA      NA       NA  
+    ## React                                     NA         NA      NA       NA  
+    ## Next.js                                   NA         NA      NA       NA  
+    ## Vue                                       NA         NA      NA       NA  
+    ## .NET                                      NA         NA      NA       NA  
+    ## ASP.NET                                   NA         NA      NA       NA  
+    ## Node.js                                   NA         NA      NA       NA  
+    ## NestJS                                    NA         NA      NA       NA  
+    ## Svelte                                    NA         NA      NA       NA  
+    ## Django                                    NA         NA      NA       NA  
+    ## FastAPI                                   NA         NA      NA       NA  
+    ## Symfony                                   NA         NA      NA       NA  
+    ## Laravel                                   NA         NA      NA       NA  
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 1.183 on 5 degrees of freedom
+    ##   (64 observations deleted due to missingness)
+    ## Multiple R-squared:  0.8955, Adjusted R-squared:  0.603 
+    ## F-statistic: 3.061 on 14 and 5 DF,  p-value: 0.1114
+
+## Predict
+
+``` r
+df_to_predict_no_url <- df_to_predict %>% select(-url)
+
+# Align factor levels with training data
+for (col in names(df_to_predict_no_url)) {
+  if (is.factor(df_to_predict_no_url[[col]])) {
+    df_to_predict_no_url[[col]] <- factor(df_to_predict_no_url[[col]], levels = levels(droplevels(train[[col]])))
+  }
+}
+
+# Make predictions 
+predictions <- predict(model, newdata = df_to_predict_no_url)
+```
+
+    ## Error in model.frame.default(Terms, newdata, na.action = na.action, xlev = object$xlevels): object is not a matrix
+
+``` r
+df_to_predict$predicted_rating <- predictions
+```
+
+    ## Error in eval(expr, envir, enclos): object 'predictions' not found
+
+``` r
+highest_predicted_ratings <- df_to_predict %>%
+    arrange(desc(predicted_rating))%>%
+    select(url, predicted_rating) %>%
+    slice_head(n = 10)  
+```
+
+    ## Error in `arrange()`:
+    ## i In argument: `..1 = predicted_rating`.
+    ## Caused by error:
+    ## ! object 'predicted_rating' not found
+
+``` r
+highest_predicted_ratings
+```
+
+    ## Error in eval(expr, envir, enclos): object 'highest_predicted_ratings' not found
