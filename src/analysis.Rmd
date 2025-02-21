@@ -194,14 +194,24 @@ df_model <- df_one_hot %>% filter(!is.na(rating))
 df_to_predict <- df_one_hot %>% filter(is.na(rating))
 set.seed(1)
 sample <- sample(c(TRUE, FALSE), nrow(df_model), replace=TRUE, prob=c(0.8,0.2))
-train  <- df_model[sample, ]
-test   <- df_model[!sample, ]
+df_train  <- df_model[sample, ]
+df_test   <- df_model[!sample, ]
 
 # Fit a linear regression model
-model <- lm(rating ~ . , data = train[,!colnames(train) %in% c("url", "job_title")])
+model <- lm(rating ~ . , data = df_train[,!colnames(df_train) %in% c("url", "job_title")])
 
 # Summary of the model
 summary(model)
+```
+```{r, error=TRUE, warning=TRUE}
+# Predict on test set
+predictions_test <- predict(model, newdata = df_test[,!colnames(df_test) %in% c("url", "job_title")])
+df_test <- df_test %>% mutate(predicted_rating = predictions_test) 
+df_test %>%
+    ggplot(aes(x = rating, y = predicted_rating)) +
+    geom_point(alpha=0.5, size = 3) +
+    geom_abline(intercept = 0, slope = 1, color = "#2086b9", alpha = 0.5, linewidth = 2) +
+    labs(x = "Actual Rating", y = "Predicted Rating")
 ```
 ```{r, error=TRUE, warning=TRUE}
 
@@ -212,8 +222,9 @@ model$xlevels[["job_category"]] <- union(model$xlevels[["job_category"]], levels
 #model$xlevels[["programming_languages"]] <- union(model$xlevels[["programming_languages"]], levels(df_one_hot$programming_languages))
 #model$xlevels[["frameworks"]] <- union(model$xlevels[["frameworks"]], levels(df_one_hot$frameworks))
 
+# prediction from a rank-deficient fit may be misleading -> we need more data
 predictions <- predict(model, newdata = df_to_predict[,!colnames(df_to_predict) %in% c("url", "job_title")])
-print(predictions)
+
 # Add predictions to df_to_predict
 df_to_predict <- df_to_predict %>%
     mutate(predicted_rating = predictions)
