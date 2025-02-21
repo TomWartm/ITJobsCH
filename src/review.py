@@ -1,6 +1,7 @@
 import json
 import os
 import pandas as pd
+import random
 class JobReviewer:
     def __init__(self, jobs_file='data/jobs_processed.json'):
         self.jobs = []
@@ -49,10 +50,13 @@ class JobReviewer:
                 return True
             else:
                 print("Invalid input. Please enter a number between 0 and 9 or '.' to exit.")
-    def review_random_jobs(self):
+    def review_random_jobs(self, random_order=False):
         # iterate over jobs with clean job_title
         unreviewed_jobs = [job for job in self.jobs if ('reviewed' not in job or not job['reviewed']) and 'publication_date' in  job and job['publication_date'] and 'job_title_cleaned' in job and job['job_title_cleaned']]
         unreviewed_jobs.sort(key=lambda x: pd.to_datetime(x['publication_date']).timestamp(), reverse=True)
+        
+        if random_order:
+            random.shuffle(unreviewed_jobs)
         print(f"Jobs to review: {len(unreviewed_jobs)}")
         i = 0
         for unreviewed_job in unreviewed_jobs:
@@ -65,9 +69,22 @@ class JobReviewer:
                 break
         else:
             print("No unreviewed jobs available.")
-
+            
 if __name__ == "__main__":
     parent_dir = os.path.dirname(os.path.dirname(__file__))
     job_rater = JobReviewer()
-    job_rater.review_random_jobs()
-    
+    while True:
+        review_order = input("Do you want to review jobs in random order? (yes/no or '.' to exit): ").strip().lower()
+        if review_order in ['yes', 'y']:
+            random_order = True
+            break
+        elif review_order in ['no', 'n']:
+            random_order = False
+            break
+        elif review_order == '.':
+            print("Exiting.")
+            exit()
+        else:
+            print("Invalid input. Please enter 'yes', 'no', or '.' to exit.")
+            
+    job_rater.review_random_jobs(random_order=random_order)
