@@ -612,7 +612,8 @@ qualifications.</p>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span></code></pre></div>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>raw_df <span class="ot">&lt;-</span> <span class="fu">fromJSON</span>(<span class="st">&quot;../data/jobs_processed.json&quot;</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>raw_df <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(raw_df)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(raw_df)</span></code></pre></div>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>raw_df <span class="ot">&lt;-</span> <span class="fu">tibble</span>(raw_df)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(raw_df)</span></code></pre></div>
 <pre><code>## Rows: 3,936
 ## Columns: 25
 ## $ company               &lt;chr&gt; NA, &quot;BBT Software AG&quot;, &quot;VAT Vakuumventile AG&quot;, &quot;~
@@ -796,76 +797,30 @@ preprocessing, and therefore have a NaN value in the
 <p><img src="data:image/png;base64,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" /><!-- --></p>
 <div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>df <span class="sc">%&gt;%</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">count</span>(search_query) </span></code></pre></div>
-<pre><code>##        search_query   n
-## 1          all jobs  38
-## 2     data engineer  82
-## 3    data scientist   9
-## 4 software engineer 177</code></pre>
+<pre><code>## # A tibble: 4 x 2
+##   search_query          n
+##   &lt;chr&gt;             &lt;int&gt;
+## 1 all jobs             38
+## 2 data engineer        82
+## 3 data scientist        9
+## 4 software engineer   177</code></pre>
 <div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>df <span class="sc">%&gt;%</span></span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">count</span>(job_title_cleaned) <span class="sc">%&gt;%</span></span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(<span class="fu">desc</span>(n))</span></code></pre></div>
-<pre><code>##            job_title_cleaned  n
-## 1          Software Engineer 62
-## 2            System Engineer 46
-## 3         Software Developer 14
-## 4              Data Engineer 10
-## 5            DevOps Engineer 10
-## 6        Automation Engineer  9
-## 7          Security Engineer  9
-## 8         Softwareentwickler  9
-## 9              Entwickler:in  8
-## 10          Systems Engineer  8
-## 11      Application Engineer  7
-## 12              Data Analyst  6
-## 13          Network Engineer  6
-## 14       Software Entwickler  6
-## 15            Cloud Engineer  5
-## 16           Design Engineer  5
-## 17        Frontend Developer  5
-## 18     Requirements Engineer  5
-## 19         Platform Engineer  4
-## 20        Software Architect  4
-## 21         Solution Engineer  4
-## 22             Test Engineer  4
-## 23        Fullstack Engineer  3
-## 24             ICT-Architekt  3
-## 25             ICT Architekt  3
-## 26          Projektleiter:in  3
-## 27 Site Reliability Engineer  3
-## 28               AI Engineer  2
-## 29    Applikationsentwickler  2
-## 30         Backend Developer  2
-## 31            Data Scientist  2
-## 32         Frontend Engineer  2
-## 33      Full Stack Developer  2
-## 34      Fullstack Entwickler  2
-## 35                       R&amp;D  2
-## 36          Senior Developer  2
-## 37          Softwareengineer  2
-## 38           Systemingenieur  2
-## 39         Angular Developer  1
-## 40          Backend Engineer  1
-## 41           Cloud-Architekt  1
-## 42           Cloud Architect  1
-## 43           Computer Vision  1
-## 44    Cybersecurity Engineer  1
-## 45                 Data &amp; AI  1
-## 46            Data Architect  1
-## 47         Database Engineer  1
-## 48       Fullstack Developer  1
-## 49       IT-Security Manager  1
-## 50             IT Management  1
-## 51            Java Developer  1
-## 52       Middleware Engineer  1
-## 53         Research Engineer  1
-## 54       Salesforce Engineer  1
-## 55       Software-Entwickler  1
-## 56         Softwarearchitekt  1
-## 57          Storage Engineer  1
-## 58             Teamlead Data  1
-## 59            Technical Lead  1
-## 60               UX Designer  1
-## 61             Web Developer  1</code></pre>
+<pre><code>## # A tibble: 61 x 2
+##    job_title_cleaned       n
+##    &lt;fct&gt;               &lt;int&gt;
+##  1 Software Engineer      62
+##  2 System Engineer        46
+##  3 Software Developer     14
+##  4 Data Engineer          10
+##  5 DevOps Engineer        10
+##  6 Automation Engineer     9
+##  7 Security Engineer       9
+##  8 Softwareentwickler      9
+##  9 Entwickler:in           8
+## 10 Systems Engineer        8
+## # i 51 more rows</code></pre>
 <div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>df <span class="sc">%&gt;%</span></span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">count</span>(job_category) <span class="sc">%&gt;%</span></span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> n, <span class="at">y =</span> job_category)) <span class="sc">+</span></span>
@@ -955,51 +910,48 @@ preprocessing, and therefore have a NaN value in the
 ## $ FastAPI                    &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
 ## $ Symfony                    &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
 ## $ Laravel                    &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~</code></pre>
-<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>df_model <span class="ot">&lt;-</span> df_one_hot <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(rating))</span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>df_to_predict <span class="ot">&lt;-</span> df_one_hot <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="fu">is.na</span>(rating))</span>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co">#df_model &lt;- df_one_hot %&gt;% filter(!is.na(rating))</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="co">#df_to_predict &lt;- df_one_hot %&gt;% filter(is.na(rating))</span></span>
 <span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
-<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>sample <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">FALSE</span>), <span class="fu">nrow</span>(df_model), <span class="at">replace=</span><span class="cn">TRUE</span>, <span class="at">prob=</span><span class="fu">c</span>(<span class="fl">0.8</span>,<span class="fl">0.2</span>))</span>
-<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>train  <span class="ot">&lt;-</span> df_model[sample, ]</span>
-<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>test   <span class="ot">&lt;-</span> df_model[<span class="sc">!</span>sample, ]</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>sample <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">FALSE</span>), <span class="fu">nrow</span>(df_one_hot), <span class="at">replace=</span><span class="cn">TRUE</span>, <span class="at">prob=</span><span class="fu">c</span>(<span class="fl">0.8</span>,<span class="fl">0.2</span>))</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>train  <span class="ot">&lt;-</span> df_one_hot[sample, ]</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>test   <span class="ot">&lt;-</span> df_one_hot[<span class="sc">!</span>sample, ]</span>
 <span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit a linear regression model</span></span>
-<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">lm</span>(rating <span class="sc">~</span> . <span class="sc">-</span> url, <span class="at">data =</span> train)</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">lm</span>(rating <span class="sc">~</span> . <span class="sc">-</span> url, <span class="at">data =</span> df_one_hot)</span>
 <span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Summary of the model</span></span>
 <span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model)</span></code></pre></div>
 <pre><code>## 
 ## Call:
-## lm(formula = rating ~ . - url, data = train)
+## lm(formula = rating ~ . - url, data = df_one_hot)
 ## 
 ## Residuals:
-##          2          4         11         14         16         17         34 
-## -2.671e-16  1.328e-15 -1.468e-15  1.500e+00  8.149e-16  1.301e-15 -5.000e-01 
-##         35         44         46         48         49         54         57 
-## -4.480e-16  1.000e+00 -1.149e-16  1.071e-16  3.014e-16  1.217e-15 -1.225e-15 
-##         58         59         63         65         72         80 
-## -3.647e-16 -1.500e+00 -2.537e-16 -1.000e+00  5.000e-01 -1.337e-15 
+##    Min     1Q Median     3Q    Max 
+##   -1.5    0.0    0.0    0.0    1.5 
 ## 
-## Coefficients: (31 not defined because of singularities)
+## Coefficients: (29 not defined because of singularities)
 ##                                     Estimate Std. Error t value Pr(&gt;|t|)  
-## (Intercept)                           2.1000     2.6510   0.792   0.4642  
-## job_categoryConsulting &amp; Management  -0.9000     1.3594  -0.662   0.5372  
-## job_categoryData Engineer             4.4000     1.5962   2.756   0.0400 *
-## job_categoryDesign                   -2.0000     1.4491  -1.380   0.2261  
-## job_categoryInfrastructure            3.4000     2.6510   1.283   0.2559  
-## job_categorySoftware Engineer         2.4000     3.3299   0.721   0.5033  
-## career_stage_cleanedsenior           -4.5000     2.0494  -2.196   0.0795 .
-## max_years                             0.2000     0.3347   0.598   0.5761  
-## Java                                  2.0000     2.5100   0.797   0.4617  
-## SQL                                   1.0000     1.6733   0.598   0.5761  
-## C                                     3.8000     4.5024   0.844   0.4372  
-## `C++`                                -1.2000     1.4873  -0.807   0.4564  
-## `No Programming Languages`            3.4000     2.2199   1.532   0.1862  
-## `C#`                                      NA         NA      NA       NA  
-## Python                                    NA         NA      NA       NA  
+## (Intercept)                           3.5000     2.1602   1.620   0.1563  
+## job_categoryConsulting &amp; Management  -0.9000     1.2410  -0.725   0.4956  
+## job_categoryData Engineer             4.4000     1.4572   3.020   0.0234 *
+## job_categoryDesign                   -2.0000     1.3229  -1.512   0.1813  
+## job_categoryInfrastructure            3.4000     2.2964   1.481   0.1892  
+## job_categorySecurity Engineer        -0.4000     1.6093  -0.249   0.8120  
+## job_categorySoftware Engineer         2.0000     2.0207   0.990   0.3605  
+## career_stage_cleanedsenior           -4.5000     1.8708  -2.405   0.0529 .
+## max_years                             0.2000     0.3055   0.655   0.5370  
+## Java                                  1.0000     2.5331   0.395   0.7067  
+## SQL                                   1.0000     1.5275   0.655   0.5370  
+## C                                     3.2000     5.5371   0.578   0.5843  
+## `C++`                                -0.2000     3.4799  -0.057   0.9560  
+## `No Programming Languages`            2.0000     2.0207   0.990   0.3605  
+## `C#`                                 -1.0000     3.4157  -0.293   0.7796  
+## Python                               -1.4000     1.9681  -0.711   0.5036  
 ## MATLAB                                    NA         NA      NA       NA  
 ## Shell                                     NA         NA      NA       NA  
 ## Lua                                       NA         NA      NA       NA  
-## CSS                                   2.4000     3.4334   0.699   0.5157  
+## CSS                                   2.4000     3.1342   0.766   0.4729  
 ## HTML                                      NA         NA      NA       NA  
 ## TypeScript                                NA         NA      NA       NA  
 ## JavaScript                                NA         NA      NA       NA  
@@ -1012,7 +964,7 @@ preprocessing, and therefore have a NaN value in the
 ## Perl                                      NA         NA      NA       NA  
 ## Rust                                      NA         NA      NA       NA  
 ## Swift                                     NA         NA      NA       NA  
-## Angular                               1.6000     1.9514   0.820   0.4496  
+## Angular                               1.6000     1.7814   0.898   0.4037  
 ## Spring                                    NA         NA      NA       NA  
 ## `No Frameworks`                           NA         NA      NA       NA  
 ## React                                     NA         NA      NA       NA  
@@ -1030,10 +982,72 @@ preprocessing, and therefore have a NaN value in the
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
-## Residual standard error: 1.183 on 5 degrees of freedom
-##   (64 observations deleted due to missingness)
-## Multiple R-squared:  0.8955, Adjusted R-squared:  0.603 
-## F-statistic: 3.061 on 14 and 5 DF,  p-value: 0.1114</code></pre>
+## Residual standard error: 1.08 on 6 degrees of freedom
+##   (282 observations deleted due to missingness)
+## Multiple R-squared:  0.9142, Adjusted R-squared:  0.6713 
+## F-statistic: 3.763 on 17 and 6 DF,  p-value: 0.05456</code></pre>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>model<span class="sc">$</span>xlevels[[<span class="st">&quot;url&quot;</span>]] <span class="ot">&lt;-</span> <span class="fu">union</span>(model<span class="sc">$</span>xlevels[[<span class="st">&quot;url&quot;</span>]], <span class="fu">levels</span>(df_one_hot<span class="sc">$</span>url))</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>model<span class="sc">$</span>xlevels[[<span class="st">&quot;job_category&quot;</span>]] <span class="ot">&lt;-</span> <span class="fu">union</span>(model<span class="sc">$</span>xlevels[[<span class="st">&quot;job_category&quot;</span>]], <span class="fu">levels</span>(df_one_hot<span class="sc">$</span>job_category))</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>model<span class="sc">$</span>xlevels[[<span class="st">&quot;career_stage_cleaned&quot;</span>]] <span class="ot">&lt;-</span> <span class="fu">union</span>(model<span class="sc">$</span>xlevels[[<span class="st">&quot;career_stage_cleaned&quot;</span>]], <span class="fu">levels</span>(df_one_hot<span class="sc">$</span>career_stage_cleaned))</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="co">#model$xlevels[[&quot;programming_languages&quot;]] &lt;- union(model$xlevels[[&quot;programming_languages&quot;]], levels(df_one_hot$programming_languages))</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a><span class="co">#model$xlevels[[&quot;frameworks&quot;]] &lt;- union(model$xlevels[[&quot;frameworks&quot;]], levels(df_one_hot$frameworks))</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>predictions <span class="ot">&lt;-</span> <span class="fu">predict</span>(model, <span class="at">newdata =</span> df_one_hot)</span></code></pre></div>
+<pre><code>## Error in model.frame.default(Terms, newdata, na.action = na.action, xlev = object$xlevels): factor url has new levels https://www.itjobs.ch/jobs/applikationsmanager-in-it-projektleiter-in-80-100/120572/, https://www.itjobs.ch/jobs/azure-software-developer-net-alle/120703/, https://www.itjobs.ch/jobs/c-software-developer-with-tax-reporting-experience/121043/, https://www.itjobs.ch/jobs/citrix-system-engineer-80-100/119363/, https://www.itjobs.ch/jobs/fullstack-entwickler-mit-fokus-auf-frontend-in-bern-gesucht-80-100-m-w-d/121221/, https://www.itjobs.ch/jobs/fullstack-software-engineer-java-angular-a/111330/, https://www.itjobs.ch/jobs/ict-architekt-in-80-100/120979/, https://www.itjobs.ch/jobs/ict-architektin-ict-architekt/120480/, https://www.itjobs.ch/jobs/it-network-engineer-80-100/120958/, https://www.itjobs.ch/jobs/lead-architekt-in-softwarearchitektur/120390/, https://www.itjobs.ch/jobs/leitung-it-management-office-80-100/120383/, https://www.itjobs.ch/jobs/network-engineer-80-100/120454/, https://www.itjobs.ch/jobs/research-software-engineer/118996/, https://www.itjobs.ch/jobs/sap-application-engineer-80-100/118969/, https://www.itjobs.ch/jobs/sap-application-engineer-80-100/118970/, https://www.itjobs.ch/jobs/security-engineer-alle/120210/, https://www.itjobs.ch/jobs/senior-ai-engineer-consultant-a/120535/, https://www.itjobs.ch/jobs/senior-cloud-engineer-azure-a/120534/, https://www.itjobs.ch/jobs/senior-fullstack-engineer-mit-schwerpunkt-frontend-lead-angular-a/120400/, https://www.itjobs.ch/jobs/senior-ict-architekt-in-netzwerkarchitektur/120391/, https://www.itjobs.ch/jobs/senior-java-software-engineer-a/111336/, https://www.itjobs.ch/jobs/senior-security-engineer-80-100/117882/, https://www.itjobs.ch/jobs/senior-software-engineer-c-net-80-100/120665/, https://www.itjobs.ch/jobs/senior-software-engineer-c-net-a/111333/, https://www.itjobs.ch/jobs/senior-system-engineer-alle/120105/, https://www.itjobs.ch/jobs/site-reliability-engineer-80-100/119976/, https://www.itjobs.ch/jobs/software-engineer-c-net-core-angular-80-100/120203/, https://www.itjobs.ch/jobs/software-engineer/118995/, https://www.itjobs.ch/jobs/software-systems-engineering-business-support-services-technology/121110/, https://www.itjobs.ch/jobs/software-test-automation-engineer-a/112374/, https://www.itjobs.ch/jobs/softwareentwickler-in-mit-bim-erfahrung-professional-senior/116810/, https://www.itjobs.ch/jobs/system-engineer-80-100/120272/, https://www.itjobs.ch/jobs/system-engineer-80-100/120303/, https://www.itjobs.ch/jobs/system-engineer-devops-80-100/118965/, https://www.itjobs.ch/jobs/system-engineer-in-60-100/120668/, https://www.jobs.ch/en/vacancies/detail/0027f781-dbb0-466b-ad87-4e25b18e898d/, https://www.jobs.ch/en/vacancies/detail/007316a1-38e9-445a-a27c-ddfa5a556409/, https://www.jobs.ch/en/vacancies/detail/0139f8ef-7199-4ef6-a0d4-55f9fd011fe0/, https://www.jobs.ch/en/vacancies/detail/0167e1db-e635-4aaa-b7f2-ef30a9b8dc1e/, https://www.jobs.ch/en/vacancies/detail/0178dadf-50ce-44ad-9b53-e804ebeba2c8/, https://www.jobs.ch/en/vacancies/detail/02b55667-90a0-4e9a-801c-01d8bdce3caa/, https://www.jobs.ch/en/vacancies/detail/0475925d-d9ff-48ac-bf4d-2eda65d62707/, https://www.jobs.ch/en/vacancies/detail/0497859b-aeb2-4f8e-8b0d-2d56b3d00452/, https://www.jobs.ch/en/vacancies/detail/0507b61d-4fa2-4200-ab5f-caaf96aac85f/, https://www.jobs.ch/en/vacancies/detail/07a0e44f-d5e9-4949-ad1a-f0b2c5261ccf/, https://www.jobs.ch/en/vacancies/detail/07c2e49a-f7fa-4784-84f0-52d66eabc9c8/, https://www.jobs.ch/en/vacancies/detail/092b1556-29fd-4366-93e1-4b63e75651b6/, https://www.jobs.ch/en/vacancies/detail/0ad683aa-44f5-4f53-b5ef-c0146c0be8f4/, https://www.jobs.ch/en/vacancies/detail/0b164fa2-10df-4a1d-ac82-fb7b8fc77146/, https://www.jobs.ch/en/vacancies/detail/0cf64a0e-ec16-4f6a-8769-db5618da11ef/, https://www.jobs.ch/en/vacancies/detail/0e2b7d77-fe3b-4f44-a787-1660d37b58dd/, https://www.jobs.ch/en/vacancies/detail/0f622136-75e9-4586-8ec1-693a44c66d12/, https://www.jobs.ch/en/vacancies/detail/1081e69b-6b6d-460e-8114-cae9e4798112/, https://www.jobs.ch/en/vacancies/detail/127a7968-522e-4419-8773-ebea399215b6/, https://www.jobs.ch/en/vacancies/detail/12f97496-d8cc-4e69-8316-e5c78706684f/, https://www.jobs.ch/en/vacancies/detail/1380ff1c-c291-42ba-8a7f-d0d86c8a18f3/, https://www.jobs.ch/en/vacancies/detail/14d2988b-5913-4053-aa2a-18a9663fe165/, https://www.jobs.ch/en/vacancies/detail/186893b2-71c4-4c2f-98ec-59672c683026/, https://www.jobs.ch/en/vacancies/detail/188fd50f-05a5-46f9-9641-2c51f9a63f51/, https://www.jobs.ch/en/vacancies/detail/1927c242-d84a-4209-bad7-f4b0e9f4139c/, https://www.jobs.ch/en/vacancies/detail/19a0a8da-0027-4757-ae72-a8921e3f2cde/, https://www.jobs.ch/en/vacancies/detail/1a75547f-ba3e-473a-adf9-faff3e48bc97/, https://www.jobs.ch/en/vacancies/detail/1af7cfd9-c1a7-4b09-94c6-f31d4232881a/, https://www.jobs.ch/en/vacancies/detail/1afb98c2-1d1d-4908-87a2-006a9bcc987b/, https://www.jobs.ch/en/vacancies/detail/1d402683-84b8-41f9-acbb-78acb3410ad7/, https://www.jobs.ch/en/vacancies/detail/1efdacb0-5c96-4dae-8a63-87f30810794f/, https://www.jobs.ch/en/vacancies/detail/2040c245-a0b8-45ee-9d7d-fed13e283039/, https://www.jobs.ch/en/vacancies/detail/204836ca-f79d-4026-bf84-9c1a6e6901ad/, https://www.jobs.ch/en/vacancies/detail/226901c0-306d-4c27-b949-bdbf699b14a6/, https://www.jobs.ch/en/vacancies/detail/22b5d24f-ec4a-46a6-aed4-430ada3160fd/, https://www.jobs.ch/en/vacancies/detail/238a0b12-832c-4627-bd5d-30737ee71f5f/, https://www.jobs.ch/en/vacancies/detail/23d53c66-128e-494c-bea8-4f787932be04/, https://www.jobs.ch/en/vacancies/detail/23e4cf7a-c64d-4679-985a-b9c8ca128864/, https://www.jobs.ch/en/vacancies/detail/24f4e719-3300-493f-af79-b1305ba1a8c0/, https://www.jobs.ch/en/vacancies/detail/25436ec9-2273-4cb3-b645-d869d06f146f/, https://www.jobs.ch/en/vacancies/detail/255a6ddb-1e67-4ce8-a463-da7a82ba7245/, https://www.jobs.ch/en/vacancies/detail/27264891-8ebb-4946-a313-1b30f4ebde7d/, https://www.jobs.ch/en/vacancies/detail/285a0cf4-2c45-4c66-be24-d71209e34e06/, https://www.jobs.ch/en/vacancies/detail/2b506a63-1943-4b79-8804-4bb7dd7e85fd/, https://www.jobs.ch/en/vacancies/detail/2c91d743-26a9-4c27-ab80-bada14698093/, https://www.jobs.ch/en/vacancies/detail/2f102fca-78dc-41b9-9dc1-3370f38be74d/, https://www.jobs.ch/en/vacancies/detail/2f7cc042-9fc0-4320-acb0-3f20a3ac98d4/, https://www.jobs.ch/en/vacancies/detail/317526b5-1a6a-437c-9cb8-1d80c83ac3e5/, https://www.jobs.ch/en/vacancies/detail/337c294d-cca1-417b-b304-4d02ea3da51a/, https://www.jobs.ch/en/vacancies/detail/36ba4f35-abba-41cc-8dcc-24a09b6a6bf3/, https://www.jobs.ch/en/vacancies/detail/37681fad-e436-49be-9025-015b3d69a5af/, https://www.jobs.ch/en/vacancies/detail/39939b62-dd6b-43a2-bc9e-cb38f920f966/, https://www.jobs.ch/en/vacancies/detail/39f988ed-69e8-4594-a22f-07e84b1aa097/, https://www.jobs.ch/en/vacancies/detail/3a453281-ef04-465f-9783-bb12301ca4c4/, https://www.jobs.ch/en/vacancies/detail/3b513e39-0827-40f4-92e4-613aff63c740/, https://www.jobs.ch/en/vacancies/detail/3db26b33-e930-4272-8fb5-0a981c16f2d4/, https://www.jobs.ch/en/vacancies/detail/3f6328b0-a825-4519-a26e-3f6e330084ca/, https://www.jobs.ch/en/vacancies/detail/3ff56652-01bd-403a-9538-140303771675/, https://www.jobs.ch/en/vacancies/detail/41e172d7-d558-4746-855a-f5621a2eed6a/, https://www.jobs.ch/en/vacancies/detail/4289e5c5-15d2-4d82-b35d-9f6113bc4d6b/, https://www.jobs.ch/en/vacancies/detail/435c876e-c5d3-4ace-b92b-644284d226fb/, https://www.jobs.ch/en/vacancies/detail/438852f4-393f-40fc-9363-2bf421435037/, https://www.jobs.ch/en/vacancies/detail/43fc969b-dba0-40b3-b2ca-4fd717d0f2f0/, https://www.jobs.ch/en/vacancies/detail/44f895f4-eebd-46d7-9885-621025b947b1/, https://www.jobs.ch/en/vacancies/detail/463ab04f-9072-4686-a1d4-7b7df193971c/, https://www.jobs.ch/en/vacancies/detail/48edeccf-00a3-4847-b4e4-b14cde303432/, https://www.jobs.ch/en/vacancies/detail/4cd2f2bd-80bb-4527-ac6d-65c336567eaa/, https://www.jobs.ch/en/vacancies/detail/4db2620d-a0af-4fa8-b637-5e763b35de46/, https://www.jobs.ch/en/vacancies/detail/4f126800-8a38-4565-8698-bc23d08ed84b/, https://www.jobs.ch/en/vacancies/detail/4f886ee9-7fad-4624-8b09-852ae633130d/, https://www.jobs.ch/en/vacancies/detail/5164bf46-eec7-4d5f-84e3-88da292cf701/, https://www.jobs.ch/en/vaca</code></pre>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Add predictions to df_to_predict</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>df_one_hot <span class="ot">&lt;-</span> df_one_hot <span class="sc">%&gt;%</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">predicted_rating =</span> predictions)</span></code></pre></div>
+<pre><code>## Error in `mutate()`:
+## i In argument: `predicted_rating = predictions`.
+## Caused by error:
+## ! object &#39;predictions&#39; not found</code></pre>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Glimpse the predictions</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(df_one_hot)</span></code></pre></div>
+<pre><code>## Rows: 306
+## Columns: 43
+## $ url                        &lt;chr&gt; &quot;https://www.jobs.ch/en/vacancies/detail/23~
+## $ job_category               &lt;fct&gt; Software Engineer, Software Engineer, Cloud~
+## $ career_stage_cleaned       &lt;fct&gt; NA, NA, NA, NA, NA, NA, senior, NA, NA, NA,~
+## $ max_years                  &lt;dbl&gt; 5, 2, 4, 3, 5, 3, 5, 2, 3, 2, 5, 5, 3, 5, 3~
+## $ rating                     &lt;dbl&gt; NA, NA, NA, NA, 7, NA, 2, NA, NA, NA, 4, NA~
+## $ Java                       &lt;dbl&gt; 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1~
+## $ SQL                        &lt;dbl&gt; 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1~
+## $ C                          &lt;dbl&gt; 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ `C++`                      &lt;dbl&gt; 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0~
+## $ `No Programming Languages` &lt;dbl&gt; 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0~
+## $ `C#`                       &lt;dbl&gt; 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0~
+## $ Python                     &lt;dbl&gt; 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0~
+## $ MATLAB                     &lt;dbl&gt; 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ Shell                      &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ Lua                        &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0~
+## $ CSS                        &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0~
+## $ HTML                       &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1~
+## $ TypeScript                 &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1~
+## $ JavaScript                 &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1~
+## $ Bash                       &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ Go                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ PowerShell                 &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ Kotlin                     &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ PHP                        &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ Dart                       &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ Perl                       &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ Rust                       &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ Swift                      &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ Angular                    &lt;dbl&gt; 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1~
+## $ Spring                     &lt;dbl&gt; 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1~
+## $ `No Frameworks`            &lt;dbl&gt; 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0~
+## $ React                      &lt;dbl&gt; 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1~
+## $ Next.js                    &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0~
+## $ Vue                        &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1~
+## $ .NET                       &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ ASP.NET                    &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ Node.js                    &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ NestJS                     &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ Svelte                     &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ Django                     &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ FastAPI                    &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ Symfony                    &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ Laravel                    &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~</code></pre>
 
 </body>
 </html>

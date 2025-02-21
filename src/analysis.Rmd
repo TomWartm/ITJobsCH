@@ -15,6 +15,7 @@ library(lubridate)
 
 raw_df <- fromJSON("../data/jobs_processed.json")
 raw_df <- bind_rows(raw_df)
+raw_df <- tibble(raw_df)
 glimpse(raw_df)
 ```
 
@@ -156,23 +157,38 @@ df %>%
 ```{r, error=TRUE, warning=TRUE}
 
 df_one_hot <- df %>%
-    select(url, job_category, career_stage_cleaned, programming_languages, frameworks, max_years, rating ) %>%
+    select(job_title, url, job_category, career_stage_cleaned, programming_languages, frameworks, max_years, rating ) %>% 
+    # handle NA values as an "Non Value" factor
+    mutate(
+        job_category = factor(replace_na(as.character(job_category), "No Value")),
+        career_stage_cleaned = factor(replace_na(as.character(career_stage_cleaned), "No Value")))
+    
+df_one_hot <- df_one_hot%>% 
     mutate(programming_languages = lapply(programming_languages, factor)) %>%
     unnest(programming_languages) %>%
     distinct() %>%
     mutate(temp = 1) %>%
-    pivot_wider(names_from = programming_languages, values_from = temp, values_fill = list(temp = 0))%>%
+    pivot_wider(names_from = programming_languages, values_from = temp, values_fill = list(temp = 0))
+
+
+df_one_hot <- df_one_hot %>%   
     unnest(frameworks) %>%
     distinct() %>%
     mutate(temp = 1) %>%
     pivot_wider(names_from = frameworks, values_from = temp, values_fill = list(temp = 0))
 
-    
 
 glimpse(df_one_hot)
+
 ```
+```{r, error=TRUE, warning=TRUE}
+df_one_hot %>%
+    mutate(has_rating = !is.na(rating)) %>%
+    group_by(has_rating) %>%
+    summarise(
+        count = n())
 
-
+```
 ```{r, error=TRUE, warning=TRUE}
 df_model <- df_one_hot %>% filter(!is.na(rating))
 df_to_predict <- df_one_hot %>% filter(is.na(rating))
@@ -182,8 +198,54 @@ train  <- df_model[sample, ]
 test   <- df_model[!sample, ]
 
 # Fit a linear regression model
-model <- lm(rating ~ . - url, data = train)
+model <- lm(rating ~ . , data = train[,!colnames(train) %in% c("url", "job_title")])
 
-
+# Summary of the model
 summary(model)
+```
+```{r, error=TRUE, warning=TRUE}
+
+# assert that there are no levels in the prediction data that are not in the model
+#model$xlevels[["url"]] <- union(model$xlevels[["url"]], levels(df_one_hot$url))
+model$xlevels[["job_category"]] <- union(model$xlevels[["job_category"]], levels(df_one_hot$job_category))
+#model$xlevels[["career_stage_cleaned"]] <- union(model$xlevels[["career_stage_cleaned"]], levels(df_one_hot$career_stage_cleaned))
+#model$xlevels[["programming_languages"]] <- union(model$xlevels[["programming_languages"]], levels(df_one_hot$programming_languages))
+#model$xlevels[["frameworks"]] <- union(model$xlevels[["frameworks"]], levels(df_one_hot$frameworks))
+
+predictions <- predict(model, newdata = df_to_predict[,!colnames(df_to_predict) %in% c("url", "job_title")])
+print(predictions)
+# Add predictions to df_to_predict
+df_to_predict <- df_to_predict %>%
+    mutate(predicted_rating = predictions)
+
+# Glimpse the predictions
+glimpse(df_to_predict)
+```
+
+## Show most promising non-rated predictions
+```{r, error=TRUE, warning=TRUE}
+# Add a column with clickable URLs
+df_to_predict <- df_to_predict %>%
+    mutate(clickable_url = paste0("[", url, "](", url, ")"))
+
+# Show most promising non-rated predictions with clickable URLs
+df_to_predict %>%
+    arrange(desc(predicted_rating)) %>%
+    select(job_title, clickable_url, predicted_rating) %>%
+    slice_head(n = 20) %>%
+    knitr::kable()
+```
+
+## Show highest rated jobs
+```{r, error=TRUE, warning=TRUE}
+# Add a column with clickable URLs
+df_model <- df_model %>%
+    mutate(clickable_url = paste0("[", url, "](", url, ")"))
+
+# Show most promising non-rated predictions with clickable URLs
+df_model %>%
+    arrange(desc(rating)) %>%
+    select(job_title, clickable_url, rating) %>%
+    slice_head(n = 20) %>%
+    knitr::kable()
 ```

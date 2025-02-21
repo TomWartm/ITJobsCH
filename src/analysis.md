@@ -16,6 +16,7 @@ library(lubridate)
 ``` r
 raw_df <- fromJSON("../data/jobs_processed.json")
 raw_df <- bind_rows(raw_df)
+raw_df <- tibble(raw_df)
 glimpse(raw_df)
 ```
 
@@ -247,11 +248,13 @@ df %>%
     count(search_query) 
 ```
 
-    ##        search_query   n
-    ## 1          all jobs  38
-    ## 2     data engineer  82
-    ## 3    data scientist   9
-    ## 4 software engineer 177
+    ## # A tibble: 4 x 2
+    ##   search_query          n
+    ##   <chr>             <int>
+    ## 1 all jobs             38
+    ## 2 data engineer        82
+    ## 3 data scientist        9
+    ## 4 software engineer   177
 
 ``` r
 df %>%
@@ -259,68 +262,20 @@ df %>%
     arrange(desc(n))
 ```
 
-    ##            job_title_cleaned  n
-    ## 1          Software Engineer 62
-    ## 2            System Engineer 46
-    ## 3         Software Developer 14
-    ## 4              Data Engineer 10
-    ## 5            DevOps Engineer 10
-    ## 6        Automation Engineer  9
-    ## 7          Security Engineer  9
-    ## 8         Softwareentwickler  9
-    ## 9              Entwickler:in  8
-    ## 10          Systems Engineer  8
-    ## 11      Application Engineer  7
-    ## 12              Data Analyst  6
-    ## 13          Network Engineer  6
-    ## 14       Software Entwickler  6
-    ## 15            Cloud Engineer  5
-    ## 16           Design Engineer  5
-    ## 17        Frontend Developer  5
-    ## 18     Requirements Engineer  5
-    ## 19         Platform Engineer  4
-    ## 20        Software Architect  4
-    ## 21         Solution Engineer  4
-    ## 22             Test Engineer  4
-    ## 23        Fullstack Engineer  3
-    ## 24             ICT-Architekt  3
-    ## 25             ICT Architekt  3
-    ## 26          Projektleiter:in  3
-    ## 27 Site Reliability Engineer  3
-    ## 28               AI Engineer  2
-    ## 29    Applikationsentwickler  2
-    ## 30         Backend Developer  2
-    ## 31            Data Scientist  2
-    ## 32         Frontend Engineer  2
-    ## 33      Full Stack Developer  2
-    ## 34      Fullstack Entwickler  2
-    ## 35                       R&D  2
-    ## 36          Senior Developer  2
-    ## 37          Softwareengineer  2
-    ## 38           Systemingenieur  2
-    ## 39         Angular Developer  1
-    ## 40          Backend Engineer  1
-    ## 41           Cloud-Architekt  1
-    ## 42           Cloud Architect  1
-    ## 43           Computer Vision  1
-    ## 44    Cybersecurity Engineer  1
-    ## 45                 Data & AI  1
-    ## 46            Data Architect  1
-    ## 47         Database Engineer  1
-    ## 48       Fullstack Developer  1
-    ## 49       IT-Security Manager  1
-    ## 50             IT Management  1
-    ## 51            Java Developer  1
-    ## 52       Middleware Engineer  1
-    ## 53         Research Engineer  1
-    ## 54       Salesforce Engineer  1
-    ## 55       Software-Entwickler  1
-    ## 56         Softwarearchitekt  1
-    ## 57          Storage Engineer  1
-    ## 58             Teamlead Data  1
-    ## 59            Technical Lead  1
-    ## 60               UX Designer  1
-    ## 61             Web Developer  1
+    ## # A tibble: 61 x 2
+    ##    job_title_cleaned       n
+    ##    <fct>               <int>
+    ##  1 Software Engineer      62
+    ##  2 System Engineer        46
+    ##  3 Software Developer     14
+    ##  4 Data Engineer          10
+    ##  5 DevOps Engineer        10
+    ##  6 Automation Engineer     9
+    ##  7 Security Engineer       9
+    ##  8 Softwareentwickler      9
+    ##  9 Entwickler:in           8
+    ## 10 Systems Engineer        8
+    ## # i 51 more rows
 
 ``` r
 df %>%
@@ -436,53 +391,50 @@ glimpse(df_one_hot)
     ## $ Laravel                    <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
 
 ``` r
-df_model <- df_one_hot %>% filter(!is.na(rating))
-df_to_predict <- df_one_hot %>% filter(is.na(rating))
+#df_model <- df_one_hot %>% filter(!is.na(rating))
+#df_to_predict <- df_one_hot %>% filter(is.na(rating))
 set.seed(1)
-sample <- sample(c(TRUE, FALSE), nrow(df_model), replace=TRUE, prob=c(0.8,0.2))
-train  <- df_model[sample, ]
-test   <- df_model[!sample, ]
+sample <- sample(c(TRUE, FALSE), nrow(df_one_hot), replace=TRUE, prob=c(0.8,0.2))
+train  <- df_one_hot[sample, ]
+test   <- df_one_hot[!sample, ]
 
 # Fit a linear regression model
-model <- lm(rating ~ . - url, data = train)
+model <- lm(rating ~ . - url, data = df_one_hot)
 
-
+# Summary of the model
 summary(model)
 ```
 
     ## 
     ## Call:
-    ## lm(formula = rating ~ . - url, data = train)
+    ## lm(formula = rating ~ . - url, data = df_one_hot)
     ## 
     ## Residuals:
-    ##          2          4         11         14         16         17         34 
-    ## -2.671e-16  1.328e-15 -1.468e-15  1.500e+00  8.149e-16  1.301e-15 -5.000e-01 
-    ##         35         44         46         48         49         54         57 
-    ## -4.480e-16  1.000e+00 -1.149e-16  1.071e-16  3.014e-16  1.217e-15 -1.225e-15 
-    ##         58         59         63         65         72         80 
-    ## -3.647e-16 -1.500e+00 -2.537e-16 -1.000e+00  5.000e-01 -1.337e-15 
+    ##    Min     1Q Median     3Q    Max 
+    ##   -1.5    0.0    0.0    0.0    1.5 
     ## 
-    ## Coefficients: (31 not defined because of singularities)
+    ## Coefficients: (29 not defined because of singularities)
     ##                                     Estimate Std. Error t value Pr(>|t|)  
-    ## (Intercept)                           2.1000     2.6510   0.792   0.4642  
-    ## job_categoryConsulting & Management  -0.9000     1.3594  -0.662   0.5372  
-    ## job_categoryData Engineer             4.4000     1.5962   2.756   0.0400 *
-    ## job_categoryDesign                   -2.0000     1.4491  -1.380   0.2261  
-    ## job_categoryInfrastructure            3.4000     2.6510   1.283   0.2559  
-    ## job_categorySoftware Engineer         2.4000     3.3299   0.721   0.5033  
-    ## career_stage_cleanedsenior           -4.5000     2.0494  -2.196   0.0795 .
-    ## max_years                             0.2000     0.3347   0.598   0.5761  
-    ## Java                                  2.0000     2.5100   0.797   0.4617  
-    ## SQL                                   1.0000     1.6733   0.598   0.5761  
-    ## C                                     3.8000     4.5024   0.844   0.4372  
-    ## `C++`                                -1.2000     1.4873  -0.807   0.4564  
-    ## `No Programming Languages`            3.4000     2.2199   1.532   0.1862  
-    ## `C#`                                      NA         NA      NA       NA  
-    ## Python                                    NA         NA      NA       NA  
+    ## (Intercept)                           3.5000     2.1602   1.620   0.1563  
+    ## job_categoryConsulting & Management  -0.9000     1.2410  -0.725   0.4956  
+    ## job_categoryData Engineer             4.4000     1.4572   3.020   0.0234 *
+    ## job_categoryDesign                   -2.0000     1.3229  -1.512   0.1813  
+    ## job_categoryInfrastructure            3.4000     2.2964   1.481   0.1892  
+    ## job_categorySecurity Engineer        -0.4000     1.6093  -0.249   0.8120  
+    ## job_categorySoftware Engineer         2.0000     2.0207   0.990   0.3605  
+    ## career_stage_cleanedsenior           -4.5000     1.8708  -2.405   0.0529 .
+    ## max_years                             0.2000     0.3055   0.655   0.5370  
+    ## Java                                  1.0000     2.5331   0.395   0.7067  
+    ## SQL                                   1.0000     1.5275   0.655   0.5370  
+    ## C                                     3.2000     5.5371   0.578   0.5843  
+    ## `C++`                                -0.2000     3.4799  -0.057   0.9560  
+    ## `No Programming Languages`            2.0000     2.0207   0.990   0.3605  
+    ## `C#`                                 -1.0000     3.4157  -0.293   0.7796  
+    ## Python                               -1.4000     1.9681  -0.711   0.5036  
     ## MATLAB                                    NA         NA      NA       NA  
     ## Shell                                     NA         NA      NA       NA  
     ## Lua                                       NA         NA      NA       NA  
-    ## CSS                                   2.4000     3.4334   0.699   0.5157  
+    ## CSS                                   2.4000     3.1342   0.766   0.4729  
     ## HTML                                      NA         NA      NA       NA  
     ## TypeScript                                NA         NA      NA       NA  
     ## JavaScript                                NA         NA      NA       NA  
@@ -495,7 +447,7 @@ summary(model)
     ## Perl                                      NA         NA      NA       NA  
     ## Rust                                      NA         NA      NA       NA  
     ## Swift                                     NA         NA      NA       NA  
-    ## Angular                               1.6000     1.9514   0.820   0.4496  
+    ## Angular                               1.6000     1.7814   0.898   0.4037  
     ## Spring                                    NA         NA      NA       NA  
     ## `No Frameworks`                           NA         NA      NA       NA  
     ## React                                     NA         NA      NA       NA  
@@ -513,7 +465,81 @@ summary(model)
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 1.183 on 5 degrees of freedom
-    ##   (64 observations deleted due to missingness)
-    ## Multiple R-squared:  0.8955, Adjusted R-squared:  0.603 
-    ## F-statistic: 3.061 on 14 and 5 DF,  p-value: 0.1114
+    ## Residual standard error: 1.08 on 6 degrees of freedom
+    ##   (282 observations deleted due to missingness)
+    ## Multiple R-squared:  0.9142, Adjusted R-squared:  0.6713 
+    ## F-statistic: 3.763 on 17 and 6 DF,  p-value: 0.05456
+
+``` r
+model$xlevels[["url"]] <- union(model$xlevels[["url"]], levels(df_one_hot$url))
+model$xlevels[["job_category"]] <- union(model$xlevels[["job_category"]], levels(df_one_hot$job_category))
+model$xlevels[["career_stage_cleaned"]] <- union(model$xlevels[["career_stage_cleaned"]], levels(df_one_hot$career_stage_cleaned))
+#model$xlevels[["programming_languages"]] <- union(model$xlevels[["programming_languages"]], levels(df_one_hot$programming_languages))
+#model$xlevels[["frameworks"]] <- union(model$xlevels[["frameworks"]], levels(df_one_hot$frameworks))
+
+predictions <- predict(model, newdata = df_one_hot)
+```
+
+    ## Error in model.frame.default(Terms, newdata, na.action = na.action, xlev = object$xlevels): factor url has new levels https://www.itjobs.ch/jobs/applikationsmanager-in-it-projektleiter-in-80-100/120572/, https://www.itjobs.ch/jobs/azure-software-developer-net-alle/120703/, https://www.itjobs.ch/jobs/c-software-developer-with-tax-reporting-experience/121043/, https://www.itjobs.ch/jobs/citrix-system-engineer-80-100/119363/, https://www.itjobs.ch/jobs/fullstack-entwickler-mit-fokus-auf-frontend-in-bern-gesucht-80-100-m-w-d/121221/, https://www.itjobs.ch/jobs/fullstack-software-engineer-java-angular-a/111330/, https://www.itjobs.ch/jobs/ict-architekt-in-80-100/120979/, https://www.itjobs.ch/jobs/ict-architektin-ict-architekt/120480/, https://www.itjobs.ch/jobs/it-network-engineer-80-100/120958/, https://www.itjobs.ch/jobs/lead-architekt-in-softwarearchitektur/120390/, https://www.itjobs.ch/jobs/leitung-it-management-office-80-100/120383/, https://www.itjobs.ch/jobs/network-engineer-80-100/120454/, https://www.itjobs.ch/jobs/research-software-engineer/118996/, https://www.itjobs.ch/jobs/sap-application-engineer-80-100/118969/, https://www.itjobs.ch/jobs/sap-application-engineer-80-100/118970/, https://www.itjobs.ch/jobs/security-engineer-alle/120210/, https://www.itjobs.ch/jobs/senior-ai-engineer-consultant-a/120535/, https://www.itjobs.ch/jobs/senior-cloud-engineer-azure-a/120534/, https://www.itjobs.ch/jobs/senior-fullstack-engineer-mit-schwerpunkt-frontend-lead-angular-a/120400/, https://www.itjobs.ch/jobs/senior-ict-architekt-in-netzwerkarchitektur/120391/, https://www.itjobs.ch/jobs/senior-java-software-engineer-a/111336/, https://www.itjobs.ch/jobs/senior-security-engineer-80-100/117882/, https://www.itjobs.ch/jobs/senior-software-engineer-c-net-80-100/120665/, https://www.itjobs.ch/jobs/senior-software-engineer-c-net-a/111333/, https://www.itjobs.ch/jobs/senior-system-engineer-alle/120105/, https://www.itjobs.ch/jobs/site-reliability-engineer-80-100/119976/, https://www.itjobs.ch/jobs/software-engineer-c-net-core-angular-80-100/120203/, https://www.itjobs.ch/jobs/software-engineer/118995/, https://www.itjobs.ch/jobs/software-systems-engineering-business-support-services-technology/121110/, https://www.itjobs.ch/jobs/software-test-automation-engineer-a/112374/, https://www.itjobs.ch/jobs/softwareentwickler-in-mit-bim-erfahrung-professional-senior/116810/, https://www.itjobs.ch/jobs/system-engineer-80-100/120272/, https://www.itjobs.ch/jobs/system-engineer-80-100/120303/, https://www.itjobs.ch/jobs/system-engineer-devops-80-100/118965/, https://www.itjobs.ch/jobs/system-engineer-in-60-100/120668/, https://www.jobs.ch/en/vacancies/detail/0027f781-dbb0-466b-ad87-4e25b18e898d/, https://www.jobs.ch/en/vacancies/detail/007316a1-38e9-445a-a27c-ddfa5a556409/, https://www.jobs.ch/en/vacancies/detail/0139f8ef-7199-4ef6-a0d4-55f9fd011fe0/, https://www.jobs.ch/en/vacancies/detail/0167e1db-e635-4aaa-b7f2-ef30a9b8dc1e/, https://www.jobs.ch/en/vacancies/detail/0178dadf-50ce-44ad-9b53-e804ebeba2c8/, https://www.jobs.ch/en/vacancies/detail/02b55667-90a0-4e9a-801c-01d8bdce3caa/, https://www.jobs.ch/en/vacancies/detail/0475925d-d9ff-48ac-bf4d-2eda65d62707/, https://www.jobs.ch/en/vacancies/detail/0497859b-aeb2-4f8e-8b0d-2d56b3d00452/, https://www.jobs.ch/en/vacancies/detail/0507b61d-4fa2-4200-ab5f-caaf96aac85f/, https://www.jobs.ch/en/vacancies/detail/07a0e44f-d5e9-4949-ad1a-f0b2c5261ccf/, https://www.jobs.ch/en/vacancies/detail/07c2e49a-f7fa-4784-84f0-52d66eabc9c8/, https://www.jobs.ch/en/vacancies/detail/092b1556-29fd-4366-93e1-4b63e75651b6/, https://www.jobs.ch/en/vacancies/detail/0ad683aa-44f5-4f53-b5ef-c0146c0be8f4/, https://www.jobs.ch/en/vacancies/detail/0b164fa2-10df-4a1d-ac82-fb7b8fc77146/, https://www.jobs.ch/en/vacancies/detail/0cf64a0e-ec16-4f6a-8769-db5618da11ef/, https://www.jobs.ch/en/vacancies/detail/0e2b7d77-fe3b-4f44-a787-1660d37b58dd/, https://www.jobs.ch/en/vacancies/detail/0f622136-75e9-4586-8ec1-693a44c66d12/, https://www.jobs.ch/en/vacancies/detail/1081e69b-6b6d-460e-8114-cae9e4798112/, https://www.jobs.ch/en/vacancies/detail/127a7968-522e-4419-8773-ebea399215b6/, https://www.jobs.ch/en/vacancies/detail/12f97496-d8cc-4e69-8316-e5c78706684f/, https://www.jobs.ch/en/vacancies/detail/1380ff1c-c291-42ba-8a7f-d0d86c8a18f3/, https://www.jobs.ch/en/vacancies/detail/14d2988b-5913-4053-aa2a-18a9663fe165/, https://www.jobs.ch/en/vacancies/detail/186893b2-71c4-4c2f-98ec-59672c683026/, https://www.jobs.ch/en/vacancies/detail/188fd50f-05a5-46f9-9641-2c51f9a63f51/, https://www.jobs.ch/en/vacancies/detail/1927c242-d84a-4209-bad7-f4b0e9f4139c/, https://www.jobs.ch/en/vacancies/detail/19a0a8da-0027-4757-ae72-a8921e3f2cde/, https://www.jobs.ch/en/vacancies/detail/1a75547f-ba3e-473a-adf9-faff3e48bc97/, https://www.jobs.ch/en/vacancies/detail/1af7cfd9-c1a7-4b09-94c6-f31d4232881a/, https://www.jobs.ch/en/vacancies/detail/1afb98c2-1d1d-4908-87a2-006a9bcc987b/, https://www.jobs.ch/en/vacancies/detail/1d402683-84b8-41f9-acbb-78acb3410ad7/, https://www.jobs.ch/en/vacancies/detail/1efdacb0-5c96-4dae-8a63-87f30810794f/, https://www.jobs.ch/en/vacancies/detail/2040c245-a0b8-45ee-9d7d-fed13e283039/, https://www.jobs.ch/en/vacancies/detail/204836ca-f79d-4026-bf84-9c1a6e6901ad/, https://www.jobs.ch/en/vacancies/detail/226901c0-306d-4c27-b949-bdbf699b14a6/, https://www.jobs.ch/en/vacancies/detail/22b5d24f-ec4a-46a6-aed4-430ada3160fd/, https://www.jobs.ch/en/vacancies/detail/238a0b12-832c-4627-bd5d-30737ee71f5f/, https://www.jobs.ch/en/vacancies/detail/23d53c66-128e-494c-bea8-4f787932be04/, https://www.jobs.ch/en/vacancies/detail/23e4cf7a-c64d-4679-985a-b9c8ca128864/, https://www.jobs.ch/en/vacancies/detail/24f4e719-3300-493f-af79-b1305ba1a8c0/, https://www.jobs.ch/en/vacancies/detail/25436ec9-2273-4cb3-b645-d869d06f146f/, https://www.jobs.ch/en/vacancies/detail/255a6ddb-1e67-4ce8-a463-da7a82ba7245/, https://www.jobs.ch/en/vacancies/detail/27264891-8ebb-4946-a313-1b30f4ebde7d/, https://www.jobs.ch/en/vacancies/detail/285a0cf4-2c45-4c66-be24-d71209e34e06/, https://www.jobs.ch/en/vacancies/detail/2b506a63-1943-4b79-8804-4bb7dd7e85fd/, https://www.jobs.ch/en/vacancies/detail/2c91d743-26a9-4c27-ab80-bada14698093/, https://www.jobs.ch/en/vacancies/detail/2f102fca-78dc-41b9-9dc1-3370f38be74d/, https://www.jobs.ch/en/vacancies/detail/2f7cc042-9fc0-4320-acb0-3f20a3ac98d4/, https://www.jobs.ch/en/vacancies/detail/317526b5-1a6a-437c-9cb8-1d80c83ac3e5/, https://www.jobs.ch/en/vacancies/detail/337c294d-cca1-417b-b304-4d02ea3da51a/, https://www.jobs.ch/en/vacancies/detail/36ba4f35-abba-41cc-8dcc-24a09b6a6bf3/, https://www.jobs.ch/en/vacancies/detail/37681fad-e436-49be-9025-015b3d69a5af/, https://www.jobs.ch/en/vacancies/detail/39939b62-dd6b-43a2-bc9e-cb38f920f966/, https://www.jobs.ch/en/vacancies/detail/39f988ed-69e8-4594-a22f-07e84b1aa097/, https://www.jobs.ch/en/vacancies/detail/3a453281-ef04-465f-9783-bb12301ca4c4/, https://www.jobs.ch/en/vacancies/detail/3b513e39-0827-40f4-92e4-613aff63c740/, https://www.jobs.ch/en/vacancies/detail/3db26b33-e930-4272-8fb5-0a981c16f2d4/, https://www.jobs.ch/en/vacancies/detail/3f6328b0-a825-4519-a26e-3f6e330084ca/, https://www.jobs.ch/en/vacancies/detail/3ff56652-01bd-403a-9538-140303771675/, https://www.jobs.ch/en/vacancies/detail/41e172d7-d558-4746-855a-f5621a2eed6a/, https://www.jobs.ch/en/vacancies/detail/4289e5c5-15d2-4d82-b35d-9f6113bc4d6b/, https://www.jobs.ch/en/vacancies/detail/435c876e-c5d3-4ace-b92b-644284d226fb/, https://www.jobs.ch/en/vacancies/detail/438852f4-393f-40fc-9363-2bf421435037/, https://www.jobs.ch/en/vacancies/detail/43fc969b-dba0-40b3-b2ca-4fd717d0f2f0/, https://www.jobs.ch/en/vacancies/detail/44f895f4-eebd-46d7-9885-621025b947b1/, https://www.jobs.ch/en/vacancies/detail/463ab04f-9072-4686-a1d4-7b7df193971c/, https://www.jobs.ch/en/vacancies/detail/48edeccf-00a3-4847-b4e4-b14cde303432/, https://www.jobs.ch/en/vacancies/detail/4cd2f2bd-80bb-4527-ac6d-65c336567eaa/, https://www.jobs.ch/en/vacancies/detail/4db2620d-a0af-4fa8-b637-5e763b35de46/, https://www.jobs.ch/en/vacancies/detail/4f126800-8a38-4565-8698-bc23d08ed84b/, https://www.jobs.ch/en/vacancies/detail/4f886ee9-7fad-4624-8b09-852ae633130d/, https://www.jobs.ch/en/vacancies/detail/5164bf46-eec7-4d5f-84e3-88da292cf701/, https://www.jobs.ch/en/vaca
+
+``` r
+# Add predictions to df_to_predict
+df_one_hot <- df_one_hot %>%
+    mutate(predicted_rating = predictions)
+```
+
+    ## Error in `mutate()`:
+    ## i In argument: `predicted_rating = predictions`.
+    ## Caused by error:
+    ## ! object 'predictions' not found
+
+``` r
+# Glimpse the predictions
+glimpse(df_one_hot)
+```
+
+    ## Rows: 306
+    ## Columns: 43
+    ## $ url                        <chr> "https://www.jobs.ch/en/vacancies/detail/23~
+    ## $ job_category               <fct> Software Engineer, Software Engineer, Cloud~
+    ## $ career_stage_cleaned       <fct> NA, NA, NA, NA, NA, NA, senior, NA, NA, NA,~
+    ## $ max_years                  <dbl> 5, 2, 4, 3, 5, 3, 5, 2, 3, 2, 5, 5, 3, 5, 3~
+    ## $ rating                     <dbl> NA, NA, NA, NA, 7, NA, 2, NA, NA, NA, 4, NA~
+    ## $ Java                       <dbl> 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1~
+    ## $ SQL                        <dbl> 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1~
+    ## $ C                          <dbl> 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ `C++`                      <dbl> 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0~
+    ## $ `No Programming Languages` <dbl> 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0~
+    ## $ `C#`                       <dbl> 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0~
+    ## $ Python                     <dbl> 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0~
+    ## $ MATLAB                     <dbl> 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ Shell                      <dbl> 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ Lua                        <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0~
+    ## $ CSS                        <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0~
+    ## $ HTML                       <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1~
+    ## $ TypeScript                 <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1~
+    ## $ JavaScript                 <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1~
+    ## $ Bash                       <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ Go                         <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ PowerShell                 <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ Kotlin                     <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ PHP                        <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ Dart                       <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ Perl                       <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ Rust                       <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ Swift                      <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ Angular                    <dbl> 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1~
+    ## $ Spring                     <dbl> 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1~
+    ## $ `No Frameworks`            <dbl> 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0~
+    ## $ React                      <dbl> 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1~
+    ## $ Next.js                    <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0~
+    ## $ Vue                        <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1~
+    ## $ .NET                       <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ ASP.NET                    <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ Node.js                    <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ NestJS                     <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ Svelte                     <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ Django                     <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ FastAPI                    <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ Symfony                    <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+    ## $ Laravel                    <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
