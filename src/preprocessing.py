@@ -87,7 +87,7 @@ frameworks = {
 }
 
 tools = {
-    "Docker", "Kubernetes", "Git", "Terraform", "Ansible", "Jenkins", "GitLab", "CI/CD", "Grafana"
+    "Docker", "Kubernetes", "Git", "Terraform", "Ansible", "Jenkins", "GitLab", "CI/CD", "Grafana", "PowerBI", "Databricks"
 }
 operating_systems = {
     "Linux", "Windows", "macOS"
