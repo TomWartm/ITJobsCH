@@ -20,7 +20,7 @@ raw_df <- tibble(raw_df)
 glimpse(raw_df)
 ```
 
-    ## Rows: 4,292
+    ## Rows: 4,684
     ## Columns: 25
     ## $ company               <chr> NA, "BBT Software AG", "VAT Vakuumventile AG", "~
     ## $ contract_type         <chr> NA, NA, NA, "Unlimited employment", NA, NA, NA, ~
@@ -69,7 +69,7 @@ clean_df <- raw_df %>%
 glimpse(clean_df)
 ```
 
-    ## Rows: 4,292
+    ## Rows: 4,684
     ## Columns: 26
     ## $ company               <chr> NA, "BBT Software AG", "VAT Vakuumventile AG", "~
     ## $ contract_type         <chr> NA, NA, NA, "Unlimited employment", NA, NA, NA, ~
@@ -141,7 +141,7 @@ df <- clean_df %>%
 glimpse(df)
 ```
 
-    ## Rows: 337
+    ## Rows: 372
     ## Columns: 26
     ## $ company               <chr> "ITech Consult AG", "Hug Engineering AG", "Persi~
     ## $ contract_type         <chr> "Freelance", "Unlimited employment", "Unlimited ~
@@ -196,7 +196,7 @@ df %>%
        y = "Count") 
 ```
 
-    ## Warning: Removed 198 rows containing non-finite values (`stat_count()`).
+    ## Warning: Removed 228 rows containing non-finite values (`stat_count()`).
 
 ![](analysis_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
@@ -239,7 +239,7 @@ df %>%
     labs(x = "Rating", y = "Programming Languages")
 ```
 
-    ## Warning: Removed 338 rows containing non-finite values (`stat_boxplot()`).
+    ## Warning: Removed 387 rows containing non-finite values (`stat_boxplot()`).
 
 ![](analysis_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
@@ -251,10 +251,10 @@ df %>%
     ## # A tibble: 4 x 2
     ##   search_query          n
     ##   <chr>             <int>
-    ## 1 all jobs             42
-    ## 2 data engineer        86
+    ## 1 all jobs             45
+    ## 2 data engineer        92
     ## 3 data scientist        9
-    ## 4 software engineer   200
+    ## 4 software engineer   226
 
 ``` r
 df %>%
@@ -262,20 +262,20 @@ df %>%
     arrange(desc(n))
 ```
 
-    ## # A tibble: 64 x 2
+    ## # A tibble: 69 x 2
     ##    job_title_cleaned        n
     ##    <fct>                <int>
-    ##  1 Software Engineer       64
-    ##  2 System Engineer         51
+    ##  1 Software Engineer       71
+    ##  2 System Engineer         56
     ##  3 Software Developer      17
-    ##  4 Data Engineer           11
-    ##  5 DevOps Engineer         10
-    ##  6 Softwareentwickler      10
-    ##  7 Application Engineer     9
-    ##  8 Automation Engineer      9
-    ##  9 Entwickler:in            9
-    ## 10 Security Engineer        9
-    ## # i 54 more rows
+    ##  4 Data Engineer           13
+    ##  5 DevOps Engineer         12
+    ##  6 Softwareentwickler      11
+    ##  7 Application Engineer    10
+    ##  8 Security Engineer       10
+    ##  9 Systems Engineer        10
+    ## 10 Automation Engineer      9
+    ## # i 59 more rows
 
 ``` r
 df %>%
@@ -293,7 +293,7 @@ df %>%
     labs(x = "Rating", y = "Job Category")
 ```
 
-    ## Warning: Removed 198 rows containing non-finite values (`stat_boxplot()`).
+    ## Warning: Removed 228 rows containing non-finite values (`stat_boxplot()`).
 
 ![](analysis_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
@@ -304,7 +304,7 @@ df %>%
     labs(x = "Rating", y = "Canton")
 ```
 
-    ## Warning: Removed 198 rows containing non-finite values (`stat_boxplot()`).
+    ## Warning: Removed 228 rows containing non-finite values (`stat_boxplot()`).
 
 ![](analysis_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
@@ -318,9 +318,9 @@ df %>%
 
     ## `geom_smooth()` using formula = 'y ~ x'
 
-    ## Warning: Removed 198 rows containing non-finite values (`stat_smooth()`).
+    ## Warning: Removed 228 rows containing non-finite values (`stat_smooth()`).
 
-    ## Warning: Removed 198 rows containing missing values (`geom_point()`).
+    ## Warning: Removed 228 rows containing missing values (`geom_point()`).
 
 ![](analysis_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
@@ -355,7 +355,7 @@ df_one_hot <- df_one_hot %>%
 glimpse(df_one_hot)
 ```
 
-    ## Rows: 337
+    ## Rows: 372
     ## Columns: 44
     ## $ job_title                  <chr> "Fullstack Applikationsentwickler(in) (Java~
     ## $ url                        <chr> "https://www.jobs.ch/en/vacancies/detail/23~
@@ -413,8 +413,8 @@ df_one_hot %>%
     ## # A tibble: 2 x 2
     ##   has_rating count
     ##   <lgl>      <int>
-    ## 1 FALSE        198
-    ## 2 TRUE         139
+    ## 1 FALSE        228
+    ## 2 TRUE         144
 
 ``` r
 df_model <- df_one_hot %>% filter(!is.na(rating))
@@ -438,64 +438,64 @@ summary(model)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
-    ## -2.8550 -0.7376  0.0000  0.6296  2.7065 
+    ## -2.8371 -0.6879  0.0000  0.5085  3.6351 
     ## 
-    ## Coefficients: (7 not defined because of singularities)
+    ## Coefficients: (6 not defined because of singularities)
     ##                                     Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)                          6.68376    1.87355   3.567 0.000632 ***
-    ## job_categoryConsulting & Management -0.14697    0.63669  -0.231 0.818072    
-    ## job_categoryData Engineer            3.11745    0.58773   5.304  1.1e-06 ***
-    ## job_categoryDesign                   0.47384    1.03067   0.460 0.647035    
-    ## job_categoryInfrastructure           0.34121    0.55159   0.619 0.538057    
-    ## job_categorySecurity Engineer       -0.01600    0.60940  -0.026 0.979127    
-    ## job_categorySoftware Engineer        0.58267    0.49984   1.166 0.247427    
-    ## career_stage_cleanedNo Value        -3.38026    0.84960  -3.979 0.000159 ***
-    ## career_stage_cleanedsenior          -3.23778    0.90101  -3.594 0.000581 ***
-    ## max_years                           -0.11796    0.07406  -1.593 0.115429    
-    ## Java                                -0.09001    0.60392  -0.149 0.881919    
-    ## SQL                                  0.23989    0.48364   0.496 0.621337    
-    ## C                                    0.24970    0.77700   0.321 0.748827    
-    ## `C++`                               -0.85576    0.70056  -1.222 0.225712    
-    ## `No Programming Languages`          -1.16501    0.65127  -1.789 0.077678 .  
-    ## `C#`                                 0.61832    0.53702   1.151 0.253229    
-    ## Python                              -0.13675    0.60222  -0.227 0.820979    
-    ## MATLAB                               0.67566    1.07482   0.629 0.531506    
-    ## Shell                               -0.89564    1.44772  -0.619 0.538017    
+    ## (Intercept)                          7.10315    1.84898   3.842 0.000245 ***
+    ## job_categoryConsulting & Management -0.46678    0.58037  -0.804 0.423654    
+    ## job_categoryData Engineer            3.54253    0.57211   6.192  2.5e-08 ***
+    ## job_categoryDesign                  -1.35023    1.31530  -1.027 0.307763    
+    ## job_categoryInfrastructure           0.21919    0.51064   0.429 0.668908    
+    ## job_categorySecurity Engineer       -0.10835    0.58593  -0.185 0.853762    
+    ## job_categorySoftware Engineer        0.88684    0.44171   2.008 0.048090 *  
+    ## career_stage_cleanedNo Value        -3.68508    0.99904  -3.689 0.000412 ***
+    ## career_stage_cleanedsenior          -3.82009    1.04259  -3.664 0.000448 ***
+    ## max_years                           -0.13384    0.06431  -2.081 0.040670 *  
+    ## Java                                -0.08138    0.55625  -0.146 0.884057    
+    ## SQL                                  0.66022    0.45136   1.463 0.147503    
+    ## C                                    0.02993    0.70564   0.042 0.966278    
+    ## `C++`                               -0.84606    0.68550  -1.234 0.220780    
+    ## `No Programming Languages`          -0.68401    0.62065  -1.102 0.273773    
+    ## `C#`                                 0.51773    0.47565   1.088 0.279702    
+    ## Python                               0.38089    0.49290   0.773 0.441981    
+    ## MATLAB                               0.60830    0.82978   0.733 0.465678    
+    ## Shell                               -0.63431    1.42736  -0.444 0.657972    
     ## Lua                                       NA         NA      NA       NA    
-    ## CSS                                 -6.18849    1.97582  -3.132 0.002475 ** 
-    ## HTML                                 4.98106    2.05650   2.422 0.017846 *  
-    ## TypeScript                          -1.38250    1.30521  -1.059 0.292902    
-    ## JavaScript                           0.57837    1.03473   0.559 0.577859    
-    ## Bash                                -0.98907    1.40362  -0.705 0.483203    
-    ## Go                                   1.13744    1.09158   1.042 0.300750    
-    ## PowerShell                          -1.64918    1.05774  -1.559 0.123170    
-    ## Kotlin                               4.00209    2.02997   1.972 0.052355 .  
-    ## PHP                                  1.34926    1.82929   0.738 0.463069    
-    ## Dart                                 0.36863    1.07273   0.344 0.732081    
-    ## Perl                                -2.32357    2.16567  -1.073 0.286751    
+    ## CSS                                 -5.25867    1.92360  -2.734 0.007725 ** 
+    ## HTML                                 4.62913    1.93321   2.395 0.019011 *  
+    ## TypeScript                          -1.15325    1.18346  -0.974 0.332793    
+    ## JavaScript                           0.76012    0.95812   0.793 0.429953    
+    ## Bash                                -1.03700    1.38832  -0.747 0.457315    
+    ## Go                                   0.89790    1.07135   0.838 0.404501    
+    ## PowerShell                          -1.09657    0.72603  -1.510 0.134939    
+    ## Kotlin                               2.93762    1.96037   1.498 0.137989    
+    ## PHP                                  1.15852    1.34334   0.862 0.391070    
+    ## Dart                                -0.05608    1.36665  -0.041 0.967371    
+    ## Perl                                -2.36041    2.13668  -1.105 0.272639    
     ## Rust                                      NA         NA      NA       NA    
     ## Swift                                     NA         NA      NA       NA    
-    ## Angular                              0.26282    0.78065   0.337 0.737306    
-    ## Spring                               0.76476    1.06688   0.717 0.475710    
-    ## `No Frameworks`                     -0.16502    1.34260  -0.123 0.902510    
-    ## React                                1.92258    0.76858   2.501 0.014549 *  
-    ## Next.js                              3.44331    1.34092   2.568 0.012222 *  
-    ## Vue                                 -0.98929    1.66423  -0.594 0.554006    
-    ## .NET                                 1.11343    1.93727   0.575 0.567186    
-    ## ASP.NET                             -2.98818    2.19825  -1.359 0.178111    
+    ## Angular                             -0.19185    0.72368  -0.265 0.791622    
+    ## Spring                               1.08116    0.96967   1.115 0.268237    
+    ## `No Frameworks`                     -0.57965    1.18424  -0.489 0.625865    
+    ## React                                1.43538    0.70998   2.022 0.046592 *  
+    ## Next.js                              2.94936    1.16564   2.530 0.013386 *  
+    ## Vue                                 -0.69178    1.58155  -0.437 0.663012    
+    ## .NET                                 0.64196    1.80230   0.356 0.722648    
+    ## ASP.NET                             -3.03780    2.04257  -1.487 0.140931    
     ## Node.js                                   NA         NA      NA       NA    
     ## NestJS                                    NA         NA      NA       NA    
-    ## Svelte                               1.73224    1.64111   1.056 0.294572    
-    ## Django                               0.60445    1.95108   0.310 0.757569    
+    ## Svelte                               1.22018    2.48890   0.490 0.625317    
+    ## Django                              -0.28429    1.85803  -0.153 0.878784    
     ## FastAPI                                   NA         NA      NA       NA    
-    ## Symfony                              3.16158    2.92909   1.079 0.283881    
-    ## Laravel                                   NA         NA      NA       NA    
+    ## Symfony                              2.71818    2.80609   0.969 0.335665    
+    ## Laravel                             -0.10416    2.21610  -0.047 0.962629    
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 1.271 on 75 degrees of freedom
-    ## Multiple R-squared:  0.7111, Adjusted R-squared:  0.557 
-    ## F-statistic: 4.615 on 40 and 75 DF,  p-value: 5.972e-09
+    ## Residual standard error: 1.243 on 79 degrees of freedom
+    ## Multiple R-squared:  0.7288, Adjusted R-squared:  0.588 
+    ## F-statistic: 5.177 on 41 and 79 DF,  p-value: 2.097e-10
 
 ``` r
 # Predict on test set
@@ -540,7 +540,7 @@ df_to_predict <- df_to_predict %>%
 glimpse(df_to_predict)
 ```
 
-    ## Rows: 198
+    ## Rows: 228
     ## Columns: 45
     ## $ job_title                  <chr> "Automation Engineer Aftersales (f/m/d)", "~
     ## $ url                        <chr> "https://www.jobs.ch/en/vacancies/detail/b4~
@@ -586,7 +586,7 @@ glimpse(df_to_predict)
     ## $ FastAPI                    <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
     ## $ Symfony                    <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
     ## $ Laravel                    <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
-    ## $ predicted_rating           <dbl> 2.8791856, 1.5016417, 5.9364392, 3.4368875,~
+    ## $ predicted_rating           <dbl> 2.641457, 1.619074, 6.237402, 3.115918, 3.4~
 
 ## Show most promising non-rated predictions
 
@@ -603,28 +603,28 @@ df_to_predict %>%
     knitr::kable()
 ```
 
-| job_title                                           | clickable_url                                                                   | predicted_rating |
-|:----------------------------------------------------|:--------------------------------------------------------------------------------|-----------------:|
-| Senior Fullstack Entwickler:in PHP (60-100%)        | <https://www.jobs.ch/en/vacancies/detail/007316a1-38e9-445a-a27c-ddfa5a556409/> |        12.221208 |
-| Software Engineer (w/m/d) 80 – 100%                 | <https://www.jobs.ch/en/vacancies/detail/830e5c06-c6bb-4c1b-8b92-0850edcd5a00/> |         9.819979 |
-| Software Engineer mit Fokus Frontend (w/m/d)        | <https://www.jobs.ch/en/vacancies/detail/0027f781-dbb0-466b-ad87-4e25b18e898d/> |         9.337023 |
-| Senior Fullstack Entwickler:in .NET (60-100%)       | <https://www.jobs.ch/en/vacancies/detail/2c91d743-26a9-4c27-ab80-bada14698093/> |         8.080188 |
-| ICT Professional Applikations-Entwickler:in (100%)  | <https://www.jobs.ch/en/vacancies/detail/65fc362a-9622-493c-a3df-6022896bb52b/> |         6.459069 |
-| Senior Data Engineer                                | <https://www.jobs.ch/en/vacancies/detail/0497859b-aeb2-4f8e-8b0d-2d56b3d00452/> |         6.430914 |
-| Senior Data Engineer (m/w/d)                        | <https://www.jobs.ch/en/vacancies/detail/83382fb2-8c64-4596-a2ea-4e2196832dd8/> |         6.402383 |
-| Senior Database Engineer 80-100%                    | <https://www.jobs.ch/en/vacancies/detail/b25004b1-d527-4761-b0d2-aa1bbb153880/> |         6.402383 |
-| Software Engineer (80 - 100%)                       | <https://www.jobs.ch/en/vacancies/detail/a3ca254b-e98f-4886-9025-d231c58a9f34/> |         6.376428 |
-| Senior AI Engineer & Consultant (a)                 | <https://www.jobs.ch/en/vacancies/detail/57ae08b5-2a69-4af2-905e-5b7a103da5af/> |         6.363566 |
-| Senior AI Engineer & Consultant (a)                 | <https://www.itjobs.ch/jobs/senior-ai-engineer-consultant-a/120535/>            |         6.363566 |
-| Research Software Engineer                          | <https://www.jobs.ch/en/vacancies/detail/9b130309-c525-4ae5-ab78-9e6a464d4e39/> |         6.344662 |
-| Research Software Engineer                          | <https://www.itjobs.ch/jobs/research-software-engineer/118996/>                 |         6.344662 |
-| Frontend Engineer (part-time possible, all genders) | <https://www.jobs.ch/en/vacancies/detail/9823e9bb-a8fd-4809-9da9-73fd0e7ede24/> |         6.324010 |
-| Data Engineer                                       | <https://www.jobs.ch/en/vacancies/detail/d94dcbd4-d512-44b3-b7c9-388b4d0cee46/> |         6.259905 |
-| Data Engineer / Data Analyst - Azure IoT (80-100%)  | <https://www.jobs.ch/en/vacancies/detail/a19e5f73-f3f5-4549-9040-794c40e14c5b/> |         6.123152 |
-| Teamlead Data (w/m/d)                               | <https://www.jobs.ch/en/vacancies/detail/7ffad37d-4f1c-4abd-8ab7-1929c82fdd87/> |         6.023991 |
-| Senior Frontend Developer                           | <https://www.jobs.ch/en/vacancies/detail/dd00a2de-57bd-4420-b7bb-3864f0ee14cd/> |         5.939807 |
-| Fullstack Engineer 80 - 100 % (f/m/d)               | <https://www.jobs.ch/en/vacancies/detail/73a64291-f310-4029-ab10-997ddae30f90/> |         5.936439 |
-| Senior Data Engineer                                | <https://www.jobs.ch/en/vacancies/detail/da56fc27-2b25-4eaa-aec0-b04705b9c7db/> |         5.911759 |
+| job_title                                                                               | clickable_url                                                                   | predicted_rating |
+|:----------------------------------------------------------------------------------------|:--------------------------------------------------------------------------------|-----------------:|
+| Software Engineer (w/m/d) 80 – 100%                                                     | <https://www.jobs.ch/en/vacancies/detail/830e5c06-c6bb-4c1b-8b92-0850edcd5a00/> |        10.351159 |
+| Senior Fullstack Entwickler:in PHP (60-100%)                                            | <https://www.jobs.ch/en/vacancies/detail/007316a1-38e9-445a-a27c-ddfa5a556409/> |        10.242643 |
+| Software Engineer mit Fokus Frontend (w/m/d)                                            | <https://www.jobs.ch/en/vacancies/detail/0027f781-dbb0-466b-ad87-4e25b18e898d/> |         9.020261 |
+| Senior Java Software Engineer im Bereich Party Master Data Management (m/w/d) 80 - 100% | <https://www.jobs.ch/en/vacancies/detail/1480c988-83d7-4117-b1e4-38de78cc0523/> |         7.414908 |
+| Data Engineer / Data Analyst - Azure IoT (80-100%)                                      | <https://www.jobs.ch/en/vacancies/detail/a19e5f73-f3f5-4549-9040-794c40e14c5b/> |         7.154386 |
+| Fullstack Java Software Engineer (M/W)                                                  | <https://www.jobs.ch/en/vacancies/detail/f947b9ca-b309-4830-8fff-2c1b9b4bf693/> |         7.129372 |
+| Senior Fullstack Entwickler:in .NET (60-100%)                                           | <https://www.jobs.ch/en/vacancies/detail/2c91d743-26a9-4c27-ab80-bada14698093/> |         7.099239 |
+| Data Engineer                                                                           | <https://www.jobs.ch/en/vacancies/detail/d94dcbd4-d512-44b3-b7c9-388b4d0cee46/> |         6.773499 |
+| DATA ENGINEER exp. DATABRICKS                                                           | <https://www.jobs.ch/en/vacancies/detail/6f07c2ea-fc17-4554-8512-405e81cf0140/> |         6.752879 |
+| Senior AI Engineer & Consultant (a)                                                     | <https://www.jobs.ch/en/vacancies/detail/57ae08b5-2a69-4af2-905e-5b7a103da5af/> |         6.665573 |
+| Senior AI Engineer & Consultant (a)                                                     | <https://www.itjobs.ch/jobs/senior-ai-engineer-consultant-a/120535/>            |         6.665573 |
+| Senior Data Engineer (m/w/d)                                                            | <https://www.jobs.ch/en/vacancies/detail/83382fb2-8c64-4596-a2ea-4e2196832dd8/> |         6.638488 |
+| Senior Database Engineer 80-100%                                                        | <https://www.jobs.ch/en/vacancies/detail/b25004b1-d527-4761-b0d2-aa1bbb153880/> |         6.638488 |
+| Senior Data Engineer                                                                    | <https://www.jobs.ch/en/vacancies/detail/da56fc27-2b25-4eaa-aec0-b04705b9c7db/> |         6.617868 |
+| Teamlead Data (w/m/d)                                                                   | <https://www.jobs.ch/en/vacancies/detail/7ffad37d-4f1c-4abd-8ab7-1929c82fdd87/> |         6.505828 |
+| Senior Data Engineer                                                                    | <https://www.jobs.ch/en/vacancies/detail/0497859b-aeb2-4f8e-8b0d-2d56b3d00452/> |         6.487042 |
+| ICT Professional Applikations-Entwickler:in (100%)                                      | <https://www.jobs.ch/en/vacancies/detail/65fc362a-9622-493c-a3df-6022896bb52b/> |         6.460414 |
+| Business & Data Analyst im Versicherungsumfeld (m/w/d) 80 - 100 %                       | <https://www.jobs.ch/en/vacancies/detail/abcef6b5-9dd4-4b46-8c4f-7da34abae029/> |         6.371993 |
+| Data Architect                                                                          | <https://www.jobs.ch/en/vacancies/detail/831a204f-fcd9-4193-a2bd-b3e7d3761c29/> |         6.351373 |
+| Fullstack Engineer 80 - 100 % (f/m/d)                                                   | <https://www.jobs.ch/en/vacancies/detail/73a64291-f310-4029-ab10-997ddae30f90/> |         6.237402 |
 
 ## Show highest rated jobs
 

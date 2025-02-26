@@ -1,7 +1,7 @@
 # Job Market Insights
 This is a script that scrapes [jobs.ch](https://www.jobs.ch/en/) and [itjobs.ch](https://www.itjobs.ch/jobs/), based on keywords related to IT, to summarize, visualize, and filter interesting jobs.
 
-**Last Data Downloaded:** 21 February, 2025
+**Last Data Downloaded:** 26 February, 2025
 
 ![Plot of Publication Date Distribution](src/analysis_files/figure-gfm/time-jobs-1.png)
 * A line plot showing the daily count of publications since 1.1.2025.
