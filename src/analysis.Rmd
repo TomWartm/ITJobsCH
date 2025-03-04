@@ -47,10 +47,11 @@ clean_df %>%
   slice_head(n = 20) %>%
   pull(job_title) 
 ```
+Keep only data with recognized IT- Keywords. Other job listings are probably not IT related.
 ```{r, error=TRUE, warning=TRUE}
 # drop NaN rows
 df <- clean_df %>%
-    filter(!is.na(job_title_cleaned) & !is.na(publication_date))%>%# drop rows with no cleaned job title, since they are probably no IT related jobs 
+    filter(!is.na(job_title_cleaned) & !is.na(publication_date))%>%
     filter(publication_date > as.Date("2025-01-01"))%>%
     filter(max_years <= 20) # outliers
 
@@ -61,6 +62,7 @@ glimpse(df)
 
 
 ## Visualize
+Interesting to see the Sunndays with mostly zero job postings. Most postings are on Mondays and Thuesdays. 
 ```{r, time-jobs, error=TRUE, warning=TRUE}
 df %>%
     count(publication_date) %>%
@@ -83,6 +85,9 @@ df %>%
        y = "Count") 
 
 ```
+Most Jobs are in the broad cattegory of Software Engineering, where some keywords of this category are: "Software Engineer", "Software Developer", "Full-Stack Developer", "Applikationsentwickler/in"...
+Seccond most jobs are in the category of Cloud/System Engineering, where some keywords of this category are: "Cloud Engineer", "Cloud Architect", "Site Reliability Engineer", "System Engineer", "Systemadministrator"...
+
 ```{r, error=TRUE, warning=TRUE}
 df %>%
   ggplot() +
@@ -91,12 +96,20 @@ df %>%
        x = "Count") 
 
 ```
+There are very few explicit junior positions. Senior positions have a mean of 3.9 years of experience, and positions with no explicit career stage have a mean of 3.1 years. Note there are some outliers.
 ```{r, error=TRUE, warning=TRUE}
-p <- ggplot(df, aes(max_years, career_stage_cleaned))  +
+df %>%
+  group_by(career_stage_cleaned) %>%
+  summarise(count = n(), mean_max_years = mean(max_years, na.rm = TRUE))
+```
+Junior positions, except for one outlier, always have zero years of required experience, which makes sense.
+```{r, error=TRUE, warning=TRUE}
+df %>% 
+    ggplot(aes(x = max_years, y = career_stage_cleaned)) +
     geom_boxplot() +
     labs(y = "Career Stage",
-        x = "Min years of experience") 
-print(p)
+         x = "Max years of experience",
+         title = "Career Stage vs. Max Years of Experience with Mean Points")
 ```
 
 ```{r, error=TRUE, warning=TRUE}
@@ -153,6 +166,7 @@ df %>%
 ```
 
 ## Fit Model
+
 - Linear model is probably not the best for this usecase, classification with kNN / SVM might be more appropriate (TODO)
 ```{r, error=TRUE, warning=TRUE}
 
@@ -190,12 +204,21 @@ df_one_hot %>%
 
 ```
 ```{r, error=TRUE, warning=TRUE}
+# split train test set
 df_model <- df_one_hot %>% filter(!is.na(rating))
 df_to_predict <- df_one_hot %>% filter(is.na(rating))
 set.seed(1)
 sample <- sample(c(TRUE, FALSE), nrow(df_model), replace=TRUE, prob=c(0.8,0.2))
 df_train  <- df_model[sample, ]
 df_test   <- df_model[!sample, ]
+```
+### Linear Model
+The linear model fits relatively well to the data (getting worse with more rated data -> overfitted ), whereas the categories Data Engineer and Junior Positions are positively correlated with the rating, as well as frontend frameworks like React.js and Next.js. 
+On the other hand, the number of required years and the programming languages CSS are negatively correlated with the rating. 
+Note that the large number of attributes compared to the relatively low number of data points might lead to overfitting. 
+Especially some of the attributes have less than 5 data points, which makes this analysis not very valid. 
+However, it is fun to see that it somewhat reflects my interests and capabilities.
+```{r, error=TRUE, warning=TRUE}
 
 # Fit a linear regression model
 model <- lm(rating ~ . , data = df_train[,!colnames(df_train) %in% c("url", "job_title")])
@@ -229,11 +252,9 @@ predictions <- predict(model, newdata = df_to_predict[,!colnames(df_to_predict) 
 df_to_predict <- df_to_predict %>%
     mutate(predicted_rating = predictions)
 
-# Glimpse the predictions
-glimpse(df_to_predict)
 ```
 
-## Show most promising non-rated predictions
+### Show most promising non-rated predictions
 ```{r, error=TRUE, warning=TRUE}
 # Add a column with clickable URLs
 df_to_predict <- df_to_predict %>%
@@ -247,7 +268,7 @@ df_to_predict %>%
     knitr::kable()
 ```
 
-## Show highest rated jobs
+### Show highest rated jobs
 ```{r, error=TRUE, warning=TRUE}
 # Add a column with clickable URLs
 df_model <- df_model %>%

@@ -20,7 +20,7 @@ raw_df <- tibble(raw_df)
 glimpse(raw_df)
 ```
 
-    ## Rows: 4,684
+    ## Rows: 5,456
     ## Columns: 25
     ## $ company               <chr> NA, "BBT Software AG", "VAT Vakuumventile AG", "~
     ## $ contract_type         <chr> NA, NA, NA, "Unlimited employment", NA, NA, NA, ~
@@ -69,7 +69,7 @@ clean_df <- raw_df %>%
 glimpse(clean_df)
 ```
 
-    ## Rows: 4,684
+    ## Rows: 5,456
     ## Columns: 26
     ## $ company               <chr> NA, "BBT Software AG", "VAT Vakuumventile AG", "~
     ## $ contract_type         <chr> NA, NA, NA, "Unlimited employment", NA, NA, NA, ~
@@ -130,10 +130,13 @@ clean_df %>%
     ## [19] "IT Security Spezialist/-in 100%"                                                            
     ## [20] "Customer Support Engineer - Mexico, Brazil"
 
+Keep only data with recognized IT- Keywords. Other job listings are
+probably not IT related.
+
 ``` r
 # drop NaN rows
 df <- clean_df %>%
-    filter(!is.na(job_title_cleaned) & !is.na(publication_date))%>%# drop rows with no cleaned job title, since they are probably no IT related jobs 
+    filter(!is.na(job_title_cleaned) & !is.na(publication_date))%>%
     filter(publication_date > as.Date("2025-01-01"))%>%
     filter(max_years <= 20) # outliers
 
@@ -141,7 +144,7 @@ df <- clean_df %>%
 glimpse(df)
 ```
 
-    ## Rows: 372
+    ## Rows: 513
     ## Columns: 26
     ## $ company               <chr> "ITech Consult AG", "Hug Engineering AG", "Persi~
     ## $ contract_type         <chr> "Freelance", "Unlimited employment", "Unlimited ~
@@ -172,6 +175,9 @@ glimpse(df)
 
 ## Visualize
 
+Interesting to see the Sunndays with mostly zero job postings. Most
+postings are on Mondays and Thuesdays.
+
 ``` r
 df %>%
     count(publication_date) %>%
@@ -196,9 +202,15 @@ df %>%
        y = "Count") 
 ```
 
-    ## Warning: Removed 228 rows containing non-finite values (`stat_count()`).
+    ## Warning: Removed 298 rows containing non-finite values (`stat_count()`).
 
-![](analysis_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](analysis_files/figure-gfm/unnamed-chunk-6-1.png)<!-- --> Most Jobs
+are in the broad cattegory of Software Engineering, where some keywords
+of this category are: “Software Engineer”, “Software Developer”,
+“Full-Stack Developer”, “Applikationsentwickler/in”… Seccond most jobs
+are in the category of Cloud/System Engineering, where some keywords of
+this category are: “Cloud Engineer”, “Cloud Architect”, “Site
+Reliability Engineer”, “System Engineer”, “Systemadministrator”…
 
 ``` r
 df %>%
@@ -208,17 +220,37 @@ df %>%
        x = "Count") 
 ```
 
-![](analysis_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](analysis_files/figure-gfm/unnamed-chunk-7-1.png)<!-- --> There are
+very few explicit junior positions. Senior positions have a mean of 3.9
+years of experience, and positions with no explicit career stage have a
+mean of 3.1 years. Note there are some outliers.
 
 ``` r
-p <- ggplot(df, aes(max_years, career_stage_cleaned))  +
-    geom_boxplot() +
-    labs(y = "Career Stage",
-        x = "Min years of experience") 
-print(p)
+df %>%
+  group_by(career_stage_cleaned) %>%
+  summarise(count = n(), mean_max_years = mean(max_years, na.rm = TRUE))
 ```
 
-![](analysis_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+    ## # A tibble: 3 x 3
+    ##   career_stage_cleaned count mean_max_years
+    ##   <fct>                <int>          <dbl>
+    ## 1 junior                   8           2.38
+    ## 2 senior                 173           3.97
+    ## 3 <NA>                   332           3.16
+
+Junior positions, except for one outlier, always have zero years of
+required experience, which makes sense.
+
+``` r
+df %>% 
+    ggplot(aes(x = max_years, y = career_stage_cleaned)) +
+    geom_boxplot() +
+    labs(y = "Career Stage",
+         x = "Max years of experience",
+         title = "Career Stage vs. Max Years of Experience with Mean Points")
+```
+
+![](analysis_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 ``` r
 df %>%
@@ -229,7 +261,7 @@ df %>%
     labs(x = "Count", y = "Programming Language")
 ```
 
-![](analysis_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](analysis_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 ``` r
 df %>%
@@ -239,9 +271,9 @@ df %>%
     labs(x = "Rating", y = "Programming Languages")
 ```
 
-    ## Warning: Removed 387 rows containing non-finite values (`stat_boxplot()`).
+    ## Warning: Removed 503 rows containing non-finite values (`stat_boxplot()`).
 
-![](analysis_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](analysis_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
 df %>%
@@ -251,10 +283,10 @@ df %>%
     ## # A tibble: 4 x 2
     ##   search_query          n
     ##   <chr>             <int>
-    ## 1 all jobs             45
-    ## 2 data engineer        92
-    ## 3 data scientist        9
-    ## 4 software engineer   226
+    ## 1 all jobs             50
+    ## 2 data engineer       109
+    ## 3 data scientist       15
+    ## 4 software engineer   339
 
 ``` r
 df %>%
@@ -262,20 +294,20 @@ df %>%
     arrange(desc(n))
 ```
 
-    ## # A tibble: 69 x 2
-    ##    job_title_cleaned        n
-    ##    <fct>                <int>
-    ##  1 Software Engineer       71
-    ##  2 System Engineer         56
-    ##  3 Software Developer      17
-    ##  4 Data Engineer           13
-    ##  5 DevOps Engineer         12
-    ##  6 Softwareentwickler      11
-    ##  7 Application Engineer    10
-    ##  8 Security Engineer       10
-    ##  9 Systems Engineer        10
-    ## 10 Automation Engineer      9
-    ## # i 59 more rows
+    ## # A tibble: 77 x 2
+    ##    job_title_cleaned           n
+    ##    <fct>                   <int>
+    ##  1 Software Engineer         103
+    ##  2 System Engineer            64
+    ##  3 Data Engineer              53
+    ##  4 Software Developer         19
+    ##  5 Application Engineer       15
+    ##  6 DevOps Engineer            14
+    ##  7 Software Entwickler        13
+    ##  8 Wirtschaftsinformatiker    13
+    ##  9 Data Scientist             12
+    ## 10 Softwareentwickler         12
+    ## # i 67 more rows
 
 ``` r
 df %>%
@@ -284,7 +316,7 @@ df %>%
     geom_bar(stat = "identity")
 ```
 
-![](analysis_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](analysis_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 ``` r
 df %>%
@@ -293,9 +325,9 @@ df %>%
     labs(x = "Rating", y = "Job Category")
 ```
 
-    ## Warning: Removed 228 rows containing non-finite values (`stat_boxplot()`).
+    ## Warning: Removed 298 rows containing non-finite values (`stat_boxplot()`).
 
-![](analysis_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](analysis_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 ``` r
 df %>%
@@ -304,9 +336,9 @@ df %>%
     labs(x = "Rating", y = "Canton")
 ```
 
-    ## Warning: Removed 228 rows containing non-finite values (`stat_boxplot()`).
+    ## Warning: Removed 298 rows containing non-finite values (`stat_boxplot()`).
 
-![](analysis_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](analysis_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 ``` r
 df %>%
@@ -318,11 +350,11 @@ df %>%
 
     ## `geom_smooth()` using formula = 'y ~ x'
 
-    ## Warning: Removed 228 rows containing non-finite values (`stat_smooth()`).
+    ## Warning: Removed 298 rows containing non-finite values (`stat_smooth()`).
 
-    ## Warning: Removed 228 rows containing missing values (`geom_point()`).
+    ## Warning: Removed 298 rows containing missing values (`geom_point()`).
 
-![](analysis_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![](analysis_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
 ## Fit Model
 
@@ -355,7 +387,7 @@ df_one_hot <- df_one_hot %>%
 glimpse(df_one_hot)
 ```
 
-    ## Rows: 372
+    ## Rows: 513
     ## Columns: 44
     ## $ job_title                  <chr> "Fullstack Applikationsentwickler(in) (Java~
     ## $ url                        <chr> "https://www.jobs.ch/en/vacancies/detail/23~
@@ -413,17 +445,33 @@ df_one_hot %>%
     ## # A tibble: 2 x 2
     ##   has_rating count
     ##   <lgl>      <int>
-    ## 1 FALSE        228
-    ## 2 TRUE         144
+    ## 1 FALSE        298
+    ## 2 TRUE         215
 
 ``` r
+# split train test set
 df_model <- df_one_hot %>% filter(!is.na(rating))
 df_to_predict <- df_one_hot %>% filter(is.na(rating))
 set.seed(1)
 sample <- sample(c(TRUE, FALSE), nrow(df_model), replace=TRUE, prob=c(0.8,0.2))
 df_train  <- df_model[sample, ]
 df_test   <- df_model[!sample, ]
+```
 
+### Linear Model
+
+The linear model fits relatively well to the data (getting worse with
+more rated data -\> overfitted ), whereas the categories Data Engineer
+and Junior Positions are positively correlated with the rating, as well
+as frontend frameworks like React.js and Next.js. On the other hand, the
+number of required years and the programming languages CSS are
+negatively correlated with the rating. Note that the large number of
+attributes compared to the relatively low number of data points might
+lead to overfitting. Especially some of the attributes have less than 5
+data points, which makes this analysis not very valid. However, it is
+fun to see that it somewhat reflects my interests and capabilities.
+
+``` r
 # Fit a linear regression model
 model <- lm(rating ~ . , data = df_train[,!colnames(df_train) %in% c("url", "job_title")])
 
@@ -438,64 +486,64 @@ summary(model)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
-    ## -2.8371 -0.6879  0.0000  0.5085  3.6351 
+    ## -2.9219 -0.6645  0.0000  0.6316  3.6380 
     ## 
     ## Coefficients: (6 not defined because of singularities)
-    ##                                     Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)                          7.10315    1.84898   3.842 0.000245 ***
-    ## job_categoryConsulting & Management -0.46678    0.58037  -0.804 0.423654    
-    ## job_categoryData Engineer            3.54253    0.57211   6.192  2.5e-08 ***
-    ## job_categoryDesign                  -1.35023    1.31530  -1.027 0.307763    
-    ## job_categoryInfrastructure           0.21919    0.51064   0.429 0.668908    
-    ## job_categorySecurity Engineer       -0.10835    0.58593  -0.185 0.853762    
-    ## job_categorySoftware Engineer        0.88684    0.44171   2.008 0.048090 *  
-    ## career_stage_cleanedNo Value        -3.68508    0.99904  -3.689 0.000412 ***
-    ## career_stage_cleanedsenior          -3.82009    1.04259  -3.664 0.000448 ***
-    ## max_years                           -0.13384    0.06431  -2.081 0.040670 *  
-    ## Java                                -0.08138    0.55625  -0.146 0.884057    
-    ## SQL                                  0.66022    0.45136   1.463 0.147503    
-    ## C                                    0.02993    0.70564   0.042 0.966278    
-    ## `C++`                               -0.84606    0.68550  -1.234 0.220780    
-    ## `No Programming Languages`          -0.68401    0.62065  -1.102 0.273773    
-    ## `C#`                                 0.51773    0.47565   1.088 0.279702    
-    ## Python                               0.38089    0.49290   0.773 0.441981    
-    ## MATLAB                               0.60830    0.82978   0.733 0.465678    
-    ## Shell                               -0.63431    1.42736  -0.444 0.657972    
-    ## Lua                                       NA         NA      NA       NA    
-    ## CSS                                 -5.25867    1.92360  -2.734 0.007725 ** 
-    ## HTML                                 4.62913    1.93321   2.395 0.019011 *  
-    ## TypeScript                          -1.15325    1.18346  -0.974 0.332793    
-    ## JavaScript                           0.76012    0.95812   0.793 0.429953    
-    ## Bash                                -1.03700    1.38832  -0.747 0.457315    
-    ## Go                                   0.89790    1.07135   0.838 0.404501    
-    ## PowerShell                          -1.09657    0.72603  -1.510 0.134939    
-    ## Kotlin                               2.93762    1.96037   1.498 0.137989    
-    ## PHP                                  1.15852    1.34334   0.862 0.391070    
-    ## Dart                                -0.05608    1.36665  -0.041 0.967371    
-    ## Perl                                -2.36041    2.13668  -1.105 0.272639    
-    ## Rust                                      NA         NA      NA       NA    
-    ## Swift                                     NA         NA      NA       NA    
-    ## Angular                             -0.19185    0.72368  -0.265 0.791622    
-    ## Spring                               1.08116    0.96967   1.115 0.268237    
-    ## `No Frameworks`                     -0.57965    1.18424  -0.489 0.625865    
-    ## React                                1.43538    0.70998   2.022 0.046592 *  
-    ## Next.js                              2.94936    1.16564   2.530 0.013386 *  
-    ## Vue                                 -0.69178    1.58155  -0.437 0.663012    
-    ## .NET                                 0.64196    1.80230   0.356 0.722648    
-    ## ASP.NET                             -3.03780    2.04257  -1.487 0.140931    
-    ## Node.js                                   NA         NA      NA       NA    
-    ## NestJS                                    NA         NA      NA       NA    
-    ## Svelte                               1.22018    2.48890   0.490 0.625317    
-    ## Django                              -0.28429    1.85803  -0.153 0.878784    
-    ## FastAPI                                   NA         NA      NA       NA    
-    ## Symfony                              2.71818    2.80609   0.969 0.335665    
-    ## Laravel                             -0.10416    2.21610  -0.047 0.962629    
+    ##                                       Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)                          4.7828668  1.0371599   4.612 9.17e-06 ***
+    ## job_categoryConsulting & Management  0.3825364  0.4637797   0.825 0.410927    
+    ## job_categoryData Engineer            2.5568485  0.4154116   6.155 8.02e-09 ***
+    ## job_categoryDesign                   2.8664901  1.2266589   2.337 0.020920 *  
+    ## job_categoryInfrastructure           0.2200908  0.4087867   0.538 0.591187    
+    ## job_categorySecurity Engineer        0.1807352  0.5266221   0.343 0.731984    
+    ## job_categorySoftware Engineer        0.6677369  0.3464043   1.928 0.056002 .  
+    ## career_stage_cleanedNo Value        -2.8579747  0.6045802  -4.727 5.65e-06 ***
+    ## career_stage_cleanedsenior          -3.2141613  0.6037168  -5.324 4.12e-07 ***
+    ## max_years                           -0.0756363  0.0502405  -1.505 0.134535    
+    ## Java                                 0.2135984  0.3608638   0.592 0.554902    
+    ## SQL                                 -0.1876926  0.2976497  -0.631 0.529380    
+    ## C                                   -0.0009609  0.4040407  -0.002 0.998106    
+    ## `C++`                               -0.6104937  0.3991687  -1.529 0.128502    
+    ## `No Programming Languages`          -0.8906295  0.3893485  -2.287 0.023722 *  
+    ## `C#`                                 1.2500273  0.3614992   3.458 0.000729 ***
+    ## Python                              -0.4713850  0.3604129  -1.308 0.193129    
+    ## MATLAB                               0.8326993  0.6168411   1.350 0.179294    
+    ## Shell                                0.2271548  1.2858113   0.177 0.860038    
+    ## Lua                                         NA         NA      NA       NA    
+    ## CSS                                 -4.6869984  1.5133603  -3.097 0.002378 ** 
+    ## HTML                                 3.5099638  1.4574438   2.408 0.017377 *  
+    ## TypeScript                          -0.0536956  0.5860144  -0.092 0.927129    
+    ## JavaScript                           1.0159938  0.5398939   1.882 0.062011 .  
+    ## Bash                                        NA         NA      NA       NA    
+    ## Go                                   2.2501607  0.8413999   2.674 0.008414 ** 
+    ## PowerShell                          -0.9633213  0.5519996  -1.745 0.083234 .  
+    ## Kotlin                               2.2031881  1.5517360   1.420 0.157965    
+    ## PHP                                  0.9294285  0.9200369   1.010 0.314203    
+    ## Dart                                 0.4730955  0.6797336   0.696 0.487624    
+    ## Perl                                -2.0350985  1.6790832  -1.212 0.227618    
+    ## Rust                                        NA         NA      NA       NA    
+    ## Swift                                       NA         NA      NA       NA    
+    ## Angular                              0.8727832  0.5785549   1.509 0.133749    
+    ## Spring                               1.4998041  0.6226506   2.409 0.017357 *  
+    ## `No Frameworks`                      0.8336155  0.7604476   1.096 0.274936    
+    ## React                                0.6281269  0.5622142   1.117 0.265877    
+    ## Next.js                              3.8194912  1.0224210   3.736 0.000275 ***
+    ## Vue                                  0.9084702  1.1691777   0.777 0.438509    
+    ## .NET                                 2.2109629  1.1828590   1.869 0.063766 .  
+    ## ASP.NET                             -2.5511811  1.3535448  -1.885 0.061605 .  
+    ## Node.js                                     NA         NA      NA       NA    
+    ## NestJS                              -0.5999330  1.6046017  -0.374 0.709078    
+    ## Svelte                              -2.4440396  1.4442137  -1.692 0.092896 .  
+    ## Django                               2.1056650  1.4666419   1.436 0.153399    
+    ## FastAPI                                     NA         NA      NA       NA    
+    ## Symfony                              1.8023046  2.3094355   0.780 0.436516    
+    ## Laravel                              0.2776097  1.5028402   0.185 0.853723    
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 1.243 on 79 degrees of freedom
-    ## Multiple R-squared:  0.7288, Adjusted R-squared:  0.588 
-    ## F-statistic: 5.177 on 41 and 79 DF,  p-value: 2.097e-10
+    ## Residual standard error: 1.181 on 135 degrees of freedom
+    ## Multiple R-squared:  0.6426, Adjusted R-squared:  0.534 
+    ## F-statistic:  5.92 on 41 and 135 DF,  p-value: 1.913e-15
 
 ``` r
 # Predict on test set
@@ -514,7 +562,7 @@ df_test %>%
     labs(x = "Actual Rating", y = "Predicted Rating")
 ```
 
-![](analysis_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+![](analysis_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
 
 ``` r
 # assert that there are no levels in the prediction data that are not in the model
@@ -535,60 +583,9 @@ predictions <- predict(model, newdata = df_to_predict[,!colnames(df_to_predict) 
 # Add predictions to df_to_predict
 df_to_predict <- df_to_predict %>%
     mutate(predicted_rating = predictions)
-
-# Glimpse the predictions
-glimpse(df_to_predict)
 ```
 
-    ## Rows: 228
-    ## Columns: 45
-    ## $ job_title                  <chr> "Automation Engineer Aftersales (f/m/d)", "~
-    ## $ url                        <chr> "https://www.jobs.ch/en/vacancies/detail/b4~
-    ## $ job_category               <fct> Software Engineer, Cloud/System Engineer, S~
-    ## $ career_stage_cleaned       <fct> No Value, No Value, No Value, No Value, No ~
-    ## $ max_years                  <dbl> 2, 4, 3, 3, 2, 3, 2, 5, 5, 3, 2, 2, 2, 2, 2~
-    ## $ rating                     <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,~
-    ## $ Java                       <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0~
-    ## $ SQL                        <dbl> 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0~
-    ## $ C                          <dbl> 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
-    ## $ `C++`                      <dbl> 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0~
-    ## $ `No Programming Languages` <dbl> 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0~
-    ## $ `C#`                       <dbl> 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1~
-    ## $ Python                     <dbl> 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0~
-    ## $ MATLAB                     <dbl> 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
-    ## $ Shell                      <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
-    ## $ Lua                        <dbl> 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0~
-    ## $ CSS                        <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1~
-    ## $ HTML                       <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1~
-    ## $ TypeScript                 <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1~
-    ## $ JavaScript                 <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1~
-    ## $ Bash                       <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0~
-    ## $ Go                         <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
-    ## $ PowerShell                 <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
-    ## $ Kotlin                     <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
-    ## $ PHP                        <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
-    ## $ Dart                       <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
-    ## $ Perl                       <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
-    ## $ Rust                       <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
-    ## $ Swift                      <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
-    ## $ Angular                    <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0~
-    ## $ Spring                     <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0~
-    ## $ `No Frameworks`            <dbl> 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0~
-    ## $ React                      <dbl> 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1~
-    ## $ Next.js                    <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
-    ## $ Vue                        <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0~
-    ## $ .NET                       <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0~
-    ## $ ASP.NET                    <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0~
-    ## $ Node.js                    <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0~
-    ## $ NestJS                     <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
-    ## $ Svelte                     <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
-    ## $ Django                     <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
-    ## $ FastAPI                    <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
-    ## $ Symfony                    <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
-    ## $ Laravel                    <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
-    ## $ predicted_rating           <dbl> 2.641457, 1.619074, 6.237402, 3.115918, 3.4~
-
-## Show most promising non-rated predictions
+### Show most promising non-rated predictions
 
 ``` r
 # Add a column with clickable URLs
@@ -605,28 +602,28 @@ df_to_predict %>%
 
 | job_title                                                                               | clickable_url                                                                   | predicted_rating |
 |:----------------------------------------------------------------------------------------|:--------------------------------------------------------------------------------|-----------------:|
-| Software Engineer (w/m/d) 80 – 100%                                                     | <https://www.jobs.ch/en/vacancies/detail/830e5c06-c6bb-4c1b-8b92-0850edcd5a00/> |        10.351159 |
-| Senior Fullstack Entwickler:in PHP (60-100%)                                            | <https://www.jobs.ch/en/vacancies/detail/007316a1-38e9-445a-a27c-ddfa5a556409/> |        10.242643 |
-| Software Engineer mit Fokus Frontend (w/m/d)                                            | <https://www.jobs.ch/en/vacancies/detail/0027f781-dbb0-466b-ad87-4e25b18e898d/> |         9.020261 |
-| Senior Java Software Engineer im Bereich Party Master Data Management (m/w/d) 80 - 100% | <https://www.jobs.ch/en/vacancies/detail/1480c988-83d7-4117-b1e4-38de78cc0523/> |         7.414908 |
-| Data Engineer / Data Analyst - Azure IoT (80-100%)                                      | <https://www.jobs.ch/en/vacancies/detail/a19e5f73-f3f5-4549-9040-794c40e14c5b/> |         7.154386 |
-| Fullstack Java Software Engineer (M/W)                                                  | <https://www.jobs.ch/en/vacancies/detail/f947b9ca-b309-4830-8fff-2c1b9b4bf693/> |         7.129372 |
-| Senior Fullstack Entwickler:in .NET (60-100%)                                           | <https://www.jobs.ch/en/vacancies/detail/2c91d743-26a9-4c27-ab80-bada14698093/> |         7.099239 |
-| Data Engineer                                                                           | <https://www.jobs.ch/en/vacancies/detail/d94dcbd4-d512-44b3-b7c9-388b4d0cee46/> |         6.773499 |
-| DATA ENGINEER exp. DATABRICKS                                                           | <https://www.jobs.ch/en/vacancies/detail/6f07c2ea-fc17-4554-8512-405e81cf0140/> |         6.752879 |
-| Senior AI Engineer & Consultant (a)                                                     | <https://www.jobs.ch/en/vacancies/detail/57ae08b5-2a69-4af2-905e-5b7a103da5af/> |         6.665573 |
-| Senior AI Engineer & Consultant (a)                                                     | <https://www.itjobs.ch/jobs/senior-ai-engineer-consultant-a/120535/>            |         6.665573 |
-| Senior Data Engineer (m/w/d)                                                            | <https://www.jobs.ch/en/vacancies/detail/83382fb2-8c64-4596-a2ea-4e2196832dd8/> |         6.638488 |
-| Senior Database Engineer 80-100%                                                        | <https://www.jobs.ch/en/vacancies/detail/b25004b1-d527-4761-b0d2-aa1bbb153880/> |         6.638488 |
-| Senior Data Engineer                                                                    | <https://www.jobs.ch/en/vacancies/detail/da56fc27-2b25-4eaa-aec0-b04705b9c7db/> |         6.617868 |
-| Teamlead Data (w/m/d)                                                                   | <https://www.jobs.ch/en/vacancies/detail/7ffad37d-4f1c-4abd-8ab7-1929c82fdd87/> |         6.505828 |
-| Senior Data Engineer                                                                    | <https://www.jobs.ch/en/vacancies/detail/0497859b-aeb2-4f8e-8b0d-2d56b3d00452/> |         6.487042 |
-| ICT Professional Applikations-Entwickler:in (100%)                                      | <https://www.jobs.ch/en/vacancies/detail/65fc362a-9622-493c-a3df-6022896bb52b/> |         6.460414 |
-| Business & Data Analyst im Versicherungsumfeld (m/w/d) 80 - 100 %                       | <https://www.jobs.ch/en/vacancies/detail/abcef6b5-9dd4-4b46-8c4f-7da34abae029/> |         6.371993 |
-| Data Architect                                                                          | <https://www.jobs.ch/en/vacancies/detail/831a204f-fcd9-4193-a2bd-b3e7d3761c29/> |         6.351373 |
-| Fullstack Engineer 80 - 100 % (f/m/d)                                                   | <https://www.jobs.ch/en/vacancies/detail/73a64291-f310-4029-ab10-997ddae30f90/> |         6.237402 |
+| Software Engineer (w/m/d) 80 – 100%                                                     | <https://www.jobs.ch/en/vacancies/detail/830e5c06-c6bb-4c1b-8b92-0850edcd5a00/> |        10.773072 |
+| Software Engineer mit Fokus Frontend (w/m/d)                                            | <https://www.jobs.ch/en/vacancies/detail/0027f781-dbb0-466b-ad87-4e25b18e898d/> |         8.375468 |
+| Software Engineer (80 - 100%)                                                           | <https://www.jobs.ch/en/vacancies/detail/a3ca254b-e98f-4886-9025-d231c58a9f34/> |         8.260915 |
+| Senior Fullstack Entwickler:in .NET (60-100%)                                           | <https://www.jobs.ch/en/vacancies/detail/2c91d743-26a9-4c27-ab80-bada14698093/> |         6.768219 |
+| Java Software Engineer (m/w/d)                                                          | <https://www.jobs.ch/en/vacancies/detail/35f7f9cc-edbd-4eae-98b4-4b56483b6193/> |         6.185958 |
+| Software Engineer                                                                       | <https://www.jobs.ch/en/vacancies/detail/2f102fca-78dc-41b9-9dc1-3370f38be74d/> |         6.154008 |
+| Java Senior Software Engineer (m/w/d)                                                   | <https://www.jobs.ch/en/vacancies/detail/0b8b9c48-83eb-41fa-ab6e-28ab8c24fb99/> |         5.587159 |
+| Senior Data Engineer                                                                    | <https://www.jobs.ch/en/vacancies/detail/0497859b-aeb2-4f8e-8b0d-2d56b3d00452/> |         5.492050 |
+| ICT Professional Applikations-Entwickler:in (100%)                                      | <https://www.jobs.ch/en/vacancies/detail/65fc362a-9622-493c-a3df-6022896bb52b/> |         5.352011 |
+| Frontend Engineer (part-time possible, all genders)                                     | <https://www.jobs.ch/en/vacancies/detail/9823e9bb-a8fd-4809-9da9-73fd0e7ede24/> |         5.171859 |
+| Senior Java Software Engineer im Bereich Party Master Data Management (m/w/d) 80 - 100% | <https://www.jobs.ch/en/vacancies/detail/1480c988-83d7-4117-b1e4-38de78cc0523/> |         5.046173 |
+| Lead Architekt/-in Softwarearchitektur                                                  | <https://www.itjobs.ch/jobs/lead-architekt-in-softwarearchitektur/120390/>      |         5.027542 |
+| Fullstack Software Engineer (m/w/d)                                                     | <https://www.jobs.ch/en/vacancies/detail/bee5e4bb-c50f-42e5-bfec-bef9ec1a0b36/> |         5.027542 |
+| Junior Requirements Engineer (60 – 100%) (a)                                            | <https://www.jobs.ch/en/vacancies/detail/b2a4cbc7-5d43-438b-b688-50bdd535bf2f/> |         4.957116 |
+| Software Entwickler Java Spring/Angular (w/m)                                           | <https://www.jobs.ch/en/vacancies/detail/75f5c30a-6c0c-48ed-8aac-dfabf34b0314/> |         4.951906 |
+| Senior Software Developer - Produkt Capitastra (a)                                      | <https://www.jobs.ch/en/vacancies/detail/d0a1800d-60fa-4c1b-82f9-7003735ea0db/> |         4.917542 |
+| Senior Software Engineer C# .NET (w/m/d)                                                | <https://www.jobs.ch/en/vacancies/detail/aeaf4be5-c716-42bc-87b7-73e606b04bee/> |         4.818098 |
+| Senior Security Engineer 80-100%                                                        | <https://www.itjobs.ch/jobs/senior-security-engineer-80-100/117882/>            |         4.681944 |
+| Senior Data Engineer (m/w/d)                                                            | <https://www.jobs.ch/en/vacancies/detail/83382fb2-8c64-4596-a2ea-4e2196832dd8/> |         4.620204 |
+| Senior Database Engineer 80-100%                                                        | <https://www.jobs.ch/en/vacancies/detail/b25004b1-d527-4761-b0d2-aa1bbb153880/> |         4.620204 |
 
-## Show highest rated jobs
+### Show highest rated jobs
 
 ``` r
 # Add a column with clickable URLs
@@ -641,25 +638,25 @@ df_model %>%
     knitr::kable()
 ```
 
-| job_title                                                                        | clickable_url                                                                     | rating |
-|:---------------------------------------------------------------------------------|:----------------------------------------------------------------------------------|-------:|
-| Software Engineer Full-Stack – React Web / C# – 80% – Zürich – Digital Democracy | <https://www.jobs.ch/en/vacancies/detail/c1951c65-086f-4d60-a301-b9afbdb28f40/>   |      8 |
-| Fullstack Java/Angular Developer                                                 | <https://www.jobs.ch/en/vacancies/detail/570c3b99-db96-4d53-9d3f-c649666df7fd/>   |      8 |
-| (Junior) Software Engineer C#/.NET (80 – 100%) (a)                               | <https://www.jobs.ch/en/vacancies/detail/897ff339-03e9-49c1-8e23-c6861db9f556/>   |      8 |
-| Data Engineer                                                                    | <https://www.jobs.ch/en/vacancies/detail/02b55667-90a0-4e9a-801c-01d8bdce3caa/>   |      8 |
-| Softwareentwickler/in - Python (m/w/d)                                           | <https://www.jobs.ch/en/vacancies/detail/4f886ee9-7fad-4624-8b09-852ae633130d/>   |      8 |
-| Java / Full Stack Developer (part-time possible, all genders)                    | <https://www.jobs.ch/en/vacancies/detail/285a0cf4-2c45-4c66-be24-d71209e34e06/>   |      8 |
-| Data Engineer for Clinical Trials 80 - 100 % (f/m/d)                             | <https://www.jobs.ch/en/vacancies/detail/5543d29f-fa16-4f46-8239-8d9199c4fbbe/>   |      8 |
-| Data Analyst (alle)                                                              | <https://www.jobs.ch/en/vacancies/detail/f7345123-d71c-4a47-b6dc-dfe5f17acbc7/>   |      7 |
-| Erfahrener Java Software Engineer 80 - 100% (m/w/d)                              | <https://www.jobs.ch/en/vacancies/detail/704f6930-af1f-4253-92d4-617c4f615df8/>   |      7 |
-| Software Engineer als Full Stack Web Developer                                   | <https://www.jobs.ch/en/vacancies/detail/127a7968-522e-4419-8773-ebea399215b6/>   |      7 |
-| Frontend Engineer (part-time possible, all genders)                              | <https://www.jobs.ch/en/vacancies/detail/25436ec9-2273-4cb3-b645-d869d06f146f/>   |      7 |
-| Fullstack Applikationsentwickler(in) (Java, Angular)                             | <https://www.jobs.ch/en/vacancies/detail/23d53c66-128e-494c-bea8-4f787932be04/>   |      6 |
-| Software Developer Full-Stack JavaEE & Angular (w/m/d)                           | <https://www.jobs.ch/en/vacancies/detail/092b1556-29fd-4366-93e1-4b63e75651b6/>   |      6 |
-| Junior Requirements Engineer (60 – 100%) (a)                                     | <https://www.jobs.ch/en/vacancies/detail/5acb2c12-a282-4441-b949-8e6ea4eae666/>   |      6 |
-| Frontend Developer bei Schweizer Startup                                         | <https://www.jobs.ch/en/vacancies/detail/e0b64094-e9cc-4191-ae8d-06163dd98440/>   |      6 |
-| Software Systems Engineer - Business Support Services Technology                 | <https://www.jobs.ch/en/vacancies/detail/6f43cbd9-8576-49f5-af4d-9f4498f28d0e/>   |      6 |
-| Fullstack Entwickler (Java & Angular)                                            | <https://www.jobs.ch/en/vacancies/detail/bebee9bf-861f-489a-83c4-f5a32b9380be/>   |      6 |
-| AI Risk Manager / Senior Data Scientist (all genders)                            | <https://www.jobs.ch/en/vacancies/detail/ed39bd0a-307e-4601-beb4-43cf5309f89d/>   |      6 |
-| Senior Fullstack Engineer (C#, Angular, Python) (a)                              | <https://www.itjobs.ch/jobs/senior-fullstack-engineer-c-angular-python-a/121249/> |      6 |
-| Data Engineer (alle)                                                             | <https://www.jobs.ch/en/vacancies/detail/920e44b5-a2a5-4a26-8589-bd5fb929c2d2/>   |      5 |
+| job_title                                                                        | clickable_url                                                                   | rating |
+|:---------------------------------------------------------------------------------|:--------------------------------------------------------------------------------|-------:|
+| Software Engineer Full-Stack – React Web / C# – 80% – Zürich – Digital Democracy | <https://www.jobs.ch/en/vacancies/detail/c1951c65-086f-4d60-a301-b9afbdb28f40/> |      8 |
+| Fullstack Java/Angular Developer                                                 | <https://www.jobs.ch/en/vacancies/detail/570c3b99-db96-4d53-9d3f-c649666df7fd/> |      8 |
+| (Junior) Software Engineer C#/.NET (80 – 100%) (a)                               | <https://www.jobs.ch/en/vacancies/detail/897ff339-03e9-49c1-8e23-c6861db9f556/> |      8 |
+| Data Engineer                                                                    | <https://www.jobs.ch/en/vacancies/detail/02b55667-90a0-4e9a-801c-01d8bdce3caa/> |      8 |
+| Softwareentwickler/in - Python (m/w/d)                                           | <https://www.jobs.ch/en/vacancies/detail/4f886ee9-7fad-4624-8b09-852ae633130d/> |      8 |
+| Software Engineer                                                                | <https://www.itjobs.ch/jobs/software-engineer/118995/>                          |      8 |
+| Java / Full Stack Developer (part-time possible, all genders)                    | <https://www.jobs.ch/en/vacancies/detail/285a0cf4-2c45-4c66-be24-d71209e34e06/> |      8 |
+| Data Engineer for Clinical Trials 80 - 100 % (f/m/d)                             | <https://www.jobs.ch/en/vacancies/detail/5543d29f-fa16-4f46-8239-8d9199c4fbbe/> |      8 |
+| Data Analyst (alle)                                                              | <https://www.jobs.ch/en/vacancies/detail/f7345123-d71c-4a47-b6dc-dfe5f17acbc7/> |      7 |
+| Data Engineer                                                                    | <https://www.jobs.ch/en/vacancies/detail/d94dcbd4-d512-44b3-b7c9-388b4d0cee46/> |      7 |
+| Erfahrener Java Software Engineer 80 - 100% (m/w/d)                              | <https://www.jobs.ch/en/vacancies/detail/704f6930-af1f-4253-92d4-617c4f615df8/> |      7 |
+| Software Engineer als Full Stack Web Developer                                   | <https://www.jobs.ch/en/vacancies/detail/127a7968-522e-4419-8773-ebea399215b6/> |      7 |
+| Frontend Engineer (part-time possible, all genders)                              | <https://www.jobs.ch/en/vacancies/detail/25436ec9-2273-4cb3-b645-d869d06f146f/> |      7 |
+| Junior Software Entwickler (w/m/d)                                               | <https://www.jobs.ch/en/vacancies/detail/eda54a2b-4617-444f-8fb4-ca3baf723d59/> |      7 |
+| Fullstack Applikationsentwickler(in) (Java, Angular)                             | <https://www.jobs.ch/en/vacancies/detail/23d53c66-128e-494c-bea8-4f787932be04/> |      6 |
+| Software Developer Full-Stack JavaEE & Angular (w/m/d)                           | <https://www.jobs.ch/en/vacancies/detail/092b1556-29fd-4366-93e1-4b63e75651b6/> |      6 |
+| Junior Requirements Engineer (60 – 100%) (a)                                     | <https://www.jobs.ch/en/vacancies/detail/5acb2c12-a282-4441-b949-8e6ea4eae666/> |      6 |
+| Frontend Developer bei Schweizer Startup                                         | <https://www.jobs.ch/en/vacancies/detail/e0b64094-e9cc-4191-ae8d-06163dd98440/> |      6 |
+| Software Systems Engineer - Business Support Services Technology                 | <https://www.jobs.ch/en/vacancies/detail/6f43cbd9-8576-49f5-af4d-9f4498f28d0e/> |      6 |
+| Fullstack Entwickler (Java & Angular)                                            | <https://www.jobs.ch/en/vacancies/detail/bebee9bf-861f-489a-83c4-f5a32b9380be/> |      6 |
